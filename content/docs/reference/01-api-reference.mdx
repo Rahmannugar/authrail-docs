@@ -1,0 +1,187 @@
+---
+title: API Reference
+description: Complete API surface of AuthRail.
+---
+
+# API Reference
+
+This section documents the public API of AuthRail.
+
+---
+
+## createRail
+
+```ts
+createRail<Ctx>(
+  name: string,
+  middleware: Middleware<Ctx>[],
+  options?: {
+    debug?: boolean;
+  }
+): Rail<Ctx>
+```
+
+Creates a new rail instance.
+
+Parameters:
+
+- `name` — identifier used for debugging
+- `middleware` — ordered array of middleware
+- `options.debug` — enables console logging during evaluation
+
+Returns:
+
+```ts
+{
+  name: string;
+  evaluate(ctx: Ctx): Promise<RailResult<Ctx>>;
+}
+```
+
+---
+
+## Rail.evaluate
+
+```ts
+rail.evaluate(context: Ctx): Promise<RailResult<Ctx>>
+```
+
+Evaluates middleware sequentially and returns:
+
+```ts
+type RailResult<Ctx> = {
+  decision: {
+    type: "allow" | "deny" | "redirect";
+    to?: string;
+    reason?: string;
+  };
+  context: Ctx;
+};
+```
+
+Evaluation is always asynchronous.
+
+---
+
+## Middleware
+
+```ts
+type Middleware<Ctx> =
+  | ((ctx: Readonly<Ctx>) =>
+      | MiddlewareResult<Ctx>
+      | void
+      | Promise<MiddlewareResult<Ctx> | void>);
+```
+
+```ts
+type MiddlewareResult<Ctx> = {
+  decision?: {
+    type: "allow" | "deny" | "redirect";
+    to?: string;
+    reason?: string;
+  };
+  context?: Partial<Ctx>;
+};
+```
+
+Rules:
+
+- Returning `void` continues execution.
+- Returning `decision` short-circuits execution.
+- Returning `context` enriches the working context.
+
+---
+
+## requireAuth
+
+```ts
+requireAuth(redirectTo: string): Middleware
+```
+
+Redirects if `ctx.user` is falsy.
+
+---
+
+## requireRole
+
+```ts
+requireRole(role: string): Middleware
+```
+
+Denies if `ctx.user.role` does not match.
+
+---
+
+## allowIf
+
+```ts
+allowIf(predicate: (ctx: Ctx) => boolean): Middleware
+```
+
+Denies if predicate returns `false`.
+
+---
+
+## blockIf
+
+```ts
+blockIf(predicate: (ctx: Ctx) => boolean): Middleware
+```
+
+Denies if predicate returns `true`.
+
+---
+
+## React Utilities
+
+These are optional helpers for React environments.
+
+### RailBoundary
+
+```tsx
+<RailBoundary
+  rail={rail}
+  context={ctx}
+  fallback={ReactNode}
+  denied={ReactNode}
+  onRedirect={(to) => void}
+>
+  {children}
+</RailBoundary>
+```
+
+Evaluates a rail and renders based on decision.
+
+---
+
+### useRail
+
+```ts
+useRail(rail, context)
+```
+
+Returns:
+
+```ts
+{
+  status: "idle" | "loading" | "done";
+  decision;
+  context;
+}
+```
+
+---
+
+### protect
+
+```ts
+protect(
+  rail,
+  getContext,
+  onRedirect?,
+  fallback?,
+  denied?
+)(Component)
+```
+
+Higher-order component wrapper for route-level protection.

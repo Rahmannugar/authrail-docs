@@ -1,0 +1,91 @@
+---
+title: Server Usage
+description: Using the core engine in Node.js or server environments.
+---
+
+# Server Usage
+
+The AuthRail core engine is framework-neutral.
+
+It can be used in:
+
+- Node.js APIs
+- Express middleware
+- Serverless functions
+- Edge runtimes
+- Backend services
+
+There are no React dependencies in the core evaluation logic.
+
+---
+
+## Basic Example (Node.js)
+
+```ts
+import { createRail, requireAuth, requireRole } from "authrail";
+
+const adminRail = createRail("admin", [
+  requireAuth("/login"),
+  requireRole("admin"),
+]);
+
+const result = await adminRail.evaluate({
+  user: req.user,
+});
+```
+
+Handle the decision:
+
+```ts
+if (result.decision.type !== "allow") {
+  return res.status(403).json({ error: "Forbidden" });
+}
+
+next();
+```
+
+AuthRail emits a decision.
+Your API decides how to respond.
+
+---
+
+## Express Example
+
+```ts
+app.get("/admin", async (req, res) => {
+  const result = await adminRail.evaluate({
+    user: req.user,
+  });
+
+  if (result.decision.type !== "allow") {
+    return res.status(403).send("Forbidden");
+  }
+
+  res.send("Admin panel");
+});
+```
+
+AuthRail acts as a policy engine across every environment.
+
+---
+
+## Sharing Policy Between Frontend and Backend
+
+Because the core engine is framework-independent,
+the same rail definition can be reused:
+
+- In the frontend (React)
+- In the backend (Node)
+- In server-rendered environments
+
+Example:
+
+```ts
+// shared/policies.ts
+export const adminRail = createRail("admin", [
+  requireAuth("/login"),
+  requireRole("admin"),
+]);
+```
+
+This allows consistent authorization logic across environments.

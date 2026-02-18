@@ -1,0 +1,144 @@
+---
+title: Core Concepts
+description: How AuthRail evaluates middleware.
+---
+
+# Core Concepts
+
+AuthRail is built around three primitives:
+
+- Rail
+- Middleware
+- Decision
+
+Understanding these explains the entire system.
+
+---
+
+## Rail
+
+A rail is a named collection of ordered middleware.
+
+```ts
+createRail<Ctx>(name: string, middleware: Middleware<Ctx>[])
+```
+
+A rail does not execute automatically.
+It must be evaluated explicitly:
+
+```ts
+await rail.evaluate(context);
+```
+
+Each evaluation is independent.
+
+---
+
+## Middleware
+
+Middleware is a function that receives context and may return:
+
+```ts
+type MiddlewareResult<Ctx> = {
+  decision?: {
+    type: "allow" | "deny" | "redirect";
+    to?: string;
+  };
+  context?: Partial<Ctx>;
+};
+```
+
+Signature:
+
+```ts
+type Middleware<Ctx> = (
+  ctx: Readonly<Ctx>
+) => Promise<MiddlewareResult<Ctx> | void> | MiddlewareResult<Ctx> | void;
+```
+
+Middleware can:
+
+- return nothing → continue
+- return `decision` → short-circuit
+- return `context` → enrich context
+
+---
+
+## Execution Order
+
+Middleware runs strictly in array order.
+
+Given:
+
+```ts
+createRail("example", [
+  middlewareA,
+  middlewareB,
+  middlewareC,
+]);
+```
+
+Execution flow:
+
+1. `middlewareA`
+2. `middlewareB`
+3. `middlewareC`
+
+If `middlewareA` returns `deny`,  
+`middlewareB` and `middlewareC` will not execute.
+
+There is no parallelism.
+There is no reordering.
+
+---
+
+## Context Enrichment
+
+Middleware may return additional context:
+
+```ts
+return {
+  context: { permissions }
+};
+```
+
+Returned context is shallow-merged into the working context before the next middleware runs.
+
+Example:
+
+```ts
+initialContext = { user }
+middleware1 returns { context: { permissions } }
+
+next middleware receives:
+{ user, permissions }
+```
+
+---
+
+## Default Behavior
+
+If no middleware returns a blocking decision,
+the final decision is:
+
+```ts
+{ type: "allow" }
+```
+
+---
+
+## Evaluation Output
+
+Every evaluation returns:
+
+```ts
+{
+  decision: {
+    type: "allow" | "deny" | "redirect",
+    to?: string
+  },
+  context: Ctx
+}
+```
+
+`context` reflects any enrichment performed during execution.

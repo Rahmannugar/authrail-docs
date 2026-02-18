@@ -1,0 +1,78 @@
+---
+title: Clarifications
+description: Technical clarifications and constraints.
+---
+
+# Clarifications
+
+This page documents explicit constraints of the system.
+
+---
+
+## Not an Authentication System
+
+AuthRail does not:
+
+- Authenticate users
+- Manage sessions
+- Issue tokens
+- Store credentials
+
+It assumes authentication has already occurred.
+
+---
+
+## Not a Router
+
+AuthRail does not:
+
+- Navigate automatically
+- Modify history state
+- Integrate with any routing library
+
+It emits redirect intent.
+Your application performs navigation.
+
+---
+
+## No Global State
+
+Each `evaluate()` call is independent.
+
+There is:
+
+- No shared state
+- No caching
+- No cross-request memory
+
+---
+
+## No Implicit Parallelism
+
+Middleware runs sequentially.
+
+There is no:
+
+- Parallel execution
+- Reordering
+- Lazy evaluation
+
+---
+
+## Context Is Immutable
+
+Middleware receives:
+
+```ts
+Readonly<Ctx>
+```
+
+Direct mutation is discouraged.
+
+If enrichment is needed:
+
+```ts
+return { context: { ... } };
+```
+
+Context merging is shallow.

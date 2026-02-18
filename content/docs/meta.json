@@ -1,0 +1,21 @@
+{
+  "nav": [
+    {
+      "title": "Getting Started",
+      "pages": ["getting-started"]
+    },
+    {
+      "title": "Core Concepts",
+      "pages": ["core"]
+    },
+    {
+      "title": "Integrations",
+      "pages": ["integrations"]
+    },
+    {
+      "title": "Reference",
+      "pages": ["reference"]
+    }
+  ],
+  "pages": ["getting-started", "core", "integrations", "reference"]
+}

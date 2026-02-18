@@ -1,0 +1,139 @@
+---
+title: Advanced Patterns
+description: Practical patterns for composing policies.
+---
+
+# Advanced Patterns
+
+This section covers patterns commonly used in real applications.
+
+---
+
+## Layered Policies
+
+You can layer middleware to separate concerns.
+
+```ts
+createRail("admin", [
+  requireAuth("/login"),
+  requireRole("admin"),
+  allowIf((ctx) => ctx.accountVerified),
+]);
+```
+
+Each middleware handles one responsibility.
+
+- Authentication
+- Authorization
+- Additional constraints
+
+Execution remains strictly sequential.
+
+---
+
+## Context Enrichment
+
+Middleware can enrich context before later middleware runs.
+
+```ts
+const attachPermissions = async (ctx) => {
+  if (!ctx.user) return;
+
+  const permissions = await getPermissions(ctx.user.id);
+
+  return {
+    context: { permissions },
+  };
+};
+```
+
+Usage:
+
+```ts
+createRail("billing", [
+  requireAuth("/login"),
+  attachPermissions,
+  allowIf((ctx) => ctx.permissions?.canAccessBilling),
+]);
+```
+
+Returned `context` values are shallow-merged before the next middleware executes.
+
+---
+
+## Conditional Redirect Chains
+
+Middleware can perform structured redirect flows.
+
+```ts
+const onboardingRail = createRail("onboarding", [
+  (ctx) => {
+    if (!ctx.profile.completedProfile) {
+      return {
+        decision: { type: "redirect", to: "/onboarding/profile" },
+      };
+    }
+  },
+  (ctx) => {
+    if (!ctx.profile.selectedPlan) {
+      return {
+        decision: { type: "redirect", to: "/pricing" },
+      };
+    }
+  },
+]);
+```
+
+Only the first matching redirect executes.
+
+---
+
+## Feature Flags
+
+Feature gating is straightforward.
+
+```ts
+const featureRail = createRail("feature", [
+  requireAuth("/login"),
+  allowIf((ctx) => ctx.featureFlags?.newDashboard === true),
+]);
+```
+
+Feature flags remain external.
+AuthRail evaluates them.
+
+---
+
+## Reusable Middleware Factories
+
+Middleware can be parameterized.
+
+```ts
+const requireFeature = (featureName: string) =>
+  allowIf((ctx) => ctx.features?.[featureName] === true);
+```
+
+Usage:
+
+```ts
+createRail("beta", [
+  requireAuth("/login"),
+  requireFeature("betaAccess"),
+]);
+```
+
+---
+
+## Composing Rails
+
+You can evaluate one rail inside another if needed.
+
+```ts
+const result = await adminRail.evaluate(ctx);
+
+if (result.decision.type !== "allow") {
+  return result;
+}
+```
+
+Rails are plain objects in AuthRail, leaving composition to be explicit.

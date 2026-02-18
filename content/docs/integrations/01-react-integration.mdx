@@ -1,0 +1,110 @@
+---
+title: React Integration
+description: Using AuthRail in React applications.
+---
+
+# React Integration
+
+AuthRail provides React utilities for declarative and imperative usage.
+
+- `RailBoundary`
+- `useRail`
+- `protect`
+
+The core engine remains framework-agnostic.
+These utilities are thin wrappers around `rail.evaluate`.
+
+---
+
+## RailBoundary
+
+`RailBoundary` evaluates a rail and renders conditionally.
+
+```tsx
+import { RailBoundary } from "authrail";
+
+<RailBoundary
+  rail={adminRail}
+  context={{ user }}
+  fallback={<div>Checking...</div>}
+  denied={<div>Access denied</div>}
+  onRedirect={(to) => navigate(to)}
+>
+  <AdminPanel />
+</RailBoundary>;
+```
+
+Props:
+
+- `rail` — rail instance
+- `context` — evaluation context
+- `fallback` — rendered while evaluating
+- `denied` — rendered if decision is `deny`
+- `onRedirect` — callback if decision is `redirect`
+
+`RailBoundary` does not perform navigation.
+It emits redirect intent through `onRedirect`.
+
+---
+
+## useRail
+
+For imperative evaluation inside components.
+
+```tsx
+import { useRail } from "authrail";
+
+function DeleteButton({ user }) {
+  const { decision, status } = useRail(adminRail, { user });
+
+  if (status === "loading") return null;
+  if (decision?.type !== "allow") return null;
+
+  return <button>Delete</button>;
+}
+```
+
+Return values:
+
+```ts
+{
+  status: ("idle" | "loading" | "done", decision, context);
+}
+```
+
+---
+
+## protect
+
+Higher-order component wrapper.
+
+```tsx
+import { protect } from "authrail";
+
+const ProtectedAdmin = protect(
+  adminRail,
+  () => ({ user }),
+  (to) => navigate(to),
+  <div>Checking...</div>,
+  <div>Denied</div>,
+)(AdminPage);
+```
+
+Arguments:
+
+1. `rail`
+2. `getContext` — function returning evaluation context
+3. `onRedirect`
+4. `fallback`
+5. `denied`
+
+This is useful for route-level protection.
+
+---
+
+## Notes
+
+- Evaluation is asynchronous.
+- Context is re-evaluated when dependencies change.
+- React utilities do not modify router behavior.
+- Navigation must be handled explicitly.

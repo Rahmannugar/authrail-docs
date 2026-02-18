@@ -1,0 +1,40 @@
+---
+title: Debugging
+description: Inspecting rail evaluation.
+---
+
+# Debugging
+
+AuthRail can emit evaluation logs when debug mode is enabled.
+
+---
+
+## Enabling Debug Mode
+
+```ts
+createRail("admin", middleware, { debug: true });
+```
+
+When enabled, each middleware execution is logged.
+
+Example output:
+
+```text
+[AuthRail:admin] → requireAuthMiddleware
+[AuthRail:admin] → requireRoleMiddleware
+[AuthRail:admin] decision → allow
+```
+
+---
+
+## What Gets Logged
+
+When `debug` is enabled:
+
+- Each middleware invocation
+- Context enrichment events
+- Final decision
+
+Logging is performed using `console.log`.
+
+AuthRail does not bundle a logging library.

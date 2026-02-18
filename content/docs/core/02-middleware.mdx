@@ -1,0 +1,138 @@
+---
+title: Middleware
+description: Built-in and custom middleware.
+---
+
+# Middleware
+
+Middleware defines how a rail evaluates context.
+
+AuthRail provides several built-in middleware utilities.
+
+---
+
+## requireAuth
+
+Ensures a user exists in context.
+
+```ts
+requireAuth(redirectTo: string)
+```
+
+Example:
+
+```ts
+import { requireAuth } from "authrail";
+
+requireAuth("/login");
+```
+
+Behavior:
+
+- If `ctx.user` is falsy → returns `{ type: "redirect" }`
+- Otherwise → continues execution
+
+---
+
+## requireRole
+
+Ensures the user has a specific role.
+
+```ts
+requireRole(role: string)
+```
+
+Example:
+
+```ts
+import { requireRole } from "authrail";
+
+requireRole("admin");
+```
+
+Behavior:
+
+- If `ctx.user.role` does not match → returns `{ type: "deny" }`
+- Otherwise → continues execution
+
+---
+
+## allowIf
+
+Allows execution only if a predicate returns `true`.
+
+```ts
+allowIf(predicate: (ctx) => boolean)
+```
+
+Example:
+
+```ts
+allowIf((ctx) => ctx.featureFlags?.billing === true);
+```
+
+Behavior:
+
+- If predicate returns `false` → returns `{ type: "deny" }`
+- If predicate returns `true` → continues execution
+
+---
+
+## blockIf
+
+Blocks execution if a predicate returns `true`.
+
+```ts
+blockIf(predicate: (ctx) => boolean)
+```
+
+Example:
+
+```ts
+blockIf((ctx) => ctx.user?.suspended === true);
+```
+
+Behavior:
+
+- If predicate returns `true` → returns `{ type: "deny" }`
+- Otherwise → continues execution
+
+---
+
+## Writing Custom Middleware
+
+You can define middleware directly.
+
+Example:
+
+```ts
+const requireSubscription = async (ctx) => {
+  if (!ctx.subscriptionActive) {
+    return {
+      decision: { type: "redirect", to: "/billing" }
+    };
+  }
+};
+```
+
+Middleware must:
+
+- Accept a context object
+- Return either `void` or a `MiddlewareResult`
+- Remain deterministic
+
+---
+
+## Middleware Composition
+
+Middleware is composed simply by array order:
+
+```ts
+createRail("admin", [
+  requireAuth("/login"),
+  requireRole("admin"),
+  allowIf((ctx) => ctx.accountVerified),
+]);
+```
+
+Evaluation proceeds strictly from top to bottom.
