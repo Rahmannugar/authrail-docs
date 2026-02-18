@@ -12,50 +12,50 @@ import {
   Server,
   Cpu,
   Atom,
+  type LucideIcon,
 } from "lucide-react";
 type PageTreeRoot = typeof source.pageTree;
 type PageTreeNode = PageTreeRoot["children"][number];
 
-// Icon mapping
-const icons: Record<string, React.ReactNode> = {
-  "getting-started": <Rocket size={18} />,
-  core: <Cpu size={18} />,
-  integrations: <Puzzle size={18} />,
-  reference: <Library size={18} />,
-  introduction: <BookOpen size={18} />,
-  "quick-start": <Zap size={18} />,
-  middleware: <ShieldCheck size={18} />,
-  "server-usage": <Server size={18} />,
-  "core-concepts": <Cpu size={18} />,
-  "advanced-patterns": <Puzzle size={18} />,
-  debugging: <ShieldCheck size={18} />,
-  clarifications: <BookOpen size={18} />,
-  "api-reference": <Library size={18} />,
-  "react-integration": <Atom size={18} />,
-  react: <Atom size={18} />,
+const icons: Record<string, LucideIcon> = {
+  "getting-started": Rocket,
+  core: Cpu,
+  integrations: Puzzle,
+  reference: Library,
+  introduction: BookOpen,
+  "quick-start": Zap,
+  middleware: ShieldCheck,
+  "server-usage": Server,
+  "core-concepts": Cpu,
+  "advanced-patterns": Puzzle,
+  debugging: ShieldCheck,
+  clarifications: BookOpen,
+  "api-reference": Library,
+  "react-integration": Atom,
+  react: Atom,
 };
 
 function enhanceTree(tree: PageTreeRoot): PageTreeRoot {
   function mapNode(node: PageTreeNode): PageTreeNode {
     if (node.type === "page" || node.type === "folder") {
-      const n = node as any;
-      const key = n.url
-        ? n.url.split("/").pop()
-        : n.name
-          ? String(n.name).toLowerCase().replace(/\s+/g, "-")
+      const url = "url" in node ? node.url : undefined;
+      const name = "name" in node ? node.name : "";
+
+      const key = url
+        ? url.split("/").pop()
+        : name
+          ? String(name).toLowerCase().replace(/\s+/g, "-")
           : "";
 
-      let icon = icons[key || ""];
+      const IconComponent = icons[key || ""];
 
-      if (!icon && n.type === "folder" && n.name === "Core & Concepts") {
-        icon = icons["core"];
+      const newNode = { ...node } as any;
+      if (IconComponent) {
+        newNode.icon = <IconComponent size={18} />;
       }
 
-      const newNode: any = { ...node };
-      if (icon) newNode.icon = icon;
-
-      if (n.type === "folder" && n.children) {
-        newNode.children = n.children.map(mapNode as any);
+      if (node.type === "folder" && node.children) {
+        newNode.children = node.children.map(mapNode);
       }
       return newNode;
     }
@@ -64,7 +64,7 @@ function enhanceTree(tree: PageTreeRoot): PageTreeRoot {
 
   return {
     ...tree,
-    children: tree.children.map(mapNode as any),
+    children: tree.children.map(mapNode),
   };
 }
 
@@ -72,27 +72,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const enhancedTree = enhanceTree(source.pageTree);
 
   return (
-    <RootProvider theme={{ enabled: false }}>
+    <RootProvider theme={{ enabled: true, defaultTheme: "dark" }}>
       <DocsLayout
         tree={enhancedTree}
         nav={{
           title: (
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <Image
                 src="/authrail.png"
-                alt="AuthRail Logo"
-                width={48}
-                height={48}
+                alt="AuthRail"
+                width={32}
+                height={32}
                 className="object-contain"
+                priority
               />
-              <span className="font-bold text-lg">
+              <span className="font-bold text-lg tracking-tight text-white">
                 <span className="text-fd-primary">Auth</span>Rail
               </span>
             </div>
           ),
+          transparentMode: "top",
         }}
         sidebar={{
-          footer: <></>,
+          footer: <div className="p-4" />,
         }}
       >
         {children}
