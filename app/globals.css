@@ -5,7 +5,7 @@
 :root {
   --authrail-orange: #ff6a00;
 
-  /* Modern Dark Theme - OutRay Inspired */
+  /* Modern Dark Theme */
   --fd-background: #000000;
   --fd-foreground: #ffffff;
 
@@ -35,7 +35,6 @@
   --fd-border: #27272a;
   --fd-input: #27272a;
 
-  /* Typography */
   --font-inter: "Inter", system-ui, sans-serif;
 }
 
@@ -43,4 +42,44 @@ body {
   background: var(--fd-background);
   color: var(--fd-foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.text-fd-primary {
+  color: var(--authrail-orange);
+}
+
+[data-toc-item][data-active="true"] {
+  color: var(--authrail-orange) !important;
+}
+
+
+a[data-active="true"],
+.fd-toc-link[data-active="true"] {
+  color: var(--authrail-orange) !important;
+  font-weight: 500;
+}
+
+.fd-sidebar {
+  --fd-sidebar-bg: #000000 !important;
+  border-right: 1px solid var(--fd-border);
+}
+
+.fd-theme-toggle {
+  display: none !important;
+}
+
+figure[data-rehype-pretty-code-figure] pre {
+  padding: 0.5rem 0 !important;
+}
+
+.fd-codeblock {
+  margin: 0 !important;
+}
+
+div[data-rehype-pretty-code-fragment] {
+  background-color: #0a0a0a !important;
+}
+
+.fd-sidebar-footer {
+  border-top: none !important;
 }

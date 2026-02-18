@@ -1,0 +1,93 @@
+---
+title: Quick Start
+description: Get up and running with AuthRail in minutes.
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
+
+# Quick Start
+
+Follow these steps to integrate AuthRail into your application.
+
+<Steps>
+<Step>
+ 
+### Install the package
+
+Install the `authrail` package using your preferred package manager.
+
+<CodeBlock title="Terminal">
+  <Pre>npm install authrail</Pre>
+</CodeBlock>
+
+</Step>
+<Step>
+ 
+### Define your Rail
+
+A **Rail** is a sequence of checks that a request must pass. Create a new file (e.g., `lib/auth.ts`) and define your first rail.
+
+<CodeBlock title="lib/auth.ts">
+  <Pre>{`import { createRail, requireAuth, requireRole } from "authrail";
+
+// 1. Define the shape of your context
+type AppContext = {
+user: { id: string; role: "admin" | "user" } | null;
+path: string;
+};
+
+// 2. Create the rail
+export const adminRail = createRail<AppContext>("admin", [
+requireAuth("/login"), // Redirects to /login if user is null
+requireRole("admin"), // Denies access if role is not 'admin'
+]);`}</Pre>
+
+</CodeBlock>
+
+</Step>
+<Step>
+ 
+### Evaluate in your application
+
+Use the rail in your route handlers, server components, or API endpoints.
+
+<CodeBlock title="app/admin/page.tsx">
+  <Pre>{`import { adminRail } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/session";
+import { redirect } from "next/navigation";
+
+export default async function AdminPage() {
+  const user = await getCurrentUser();
+
+// 1. Evaluate the rail
+const result = await adminRail.evaluate({
+user,
+path: "/admin"
+});
+
+// 2. Handle the decision
+if (result.decision.type === "redirect") {
+redirect(result.decision.to);
+}
+
+if (result.decision.type === "deny") {
+return <div>Access Denied</div>;
+}
+
+// 3. Render content (Access Allowed)
+return <h1>Admin Dashboard</h1>;
+}`}</Pre>
+
+</CodeBlock>
+
+</Step>
+</Steps>
+
+## Next Steps
+
+Now that you have the basics, explore more advanced concepts:
+
+- [Middleware](/docs/middleware) - Learn about built-in middleware.
+- [Advanced Patterns](/docs/advanced-patterns) - Create your own custom logic.
+- [React Integration](/docs/react-integration) - See how to use AuthRail with React and Next.js.

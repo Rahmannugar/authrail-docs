@@ -3,6 +3,8 @@ title: React Integration
 description: Using AuthRail in React applications.
 ---
 
+import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
+
 # React Integration
 
 AuthRail provides React utilities for declarative and imperative usage.
@@ -20,8 +22,8 @@ These utilities are thin wrappers around `rail.evaluate`.
 
 `RailBoundary` evaluates a rail and renders conditionally.
 
-```tsx
-import { RailBoundary } from "authrail";
+<CodeBlock title="Usage">
+<Pre>{`import { RailBoundary } from "authrail";
 
 <RailBoundary
   rail={adminRail}
@@ -31,8 +33,8 @@ import { RailBoundary } from "authrail";
   onRedirect={(to) => navigate(to)}
 >
   <AdminPanel />
-</RailBoundary>;
-```
+</RailBoundary>;`}</Pre>
+</CodeBlock>
 
 Props:
 
@@ -51,26 +53,27 @@ It emits redirect intent through `onRedirect`.
 
 For imperative evaluation inside components.
 
-```tsx
-import { useRail } from "authrail";
+<CodeBlock title="Component">
+<Pre>{`import { useRail } from "authrail";
 
 function DeleteButton({ user }) {
-  const { decision, status } = useRail(adminRail, { user });
+const { decision, status } = useRail(adminRail, { user });
 
-  if (status === "loading") return null;
-  if (decision?.type !== "allow") return null;
+if (status === "loading") return null;
+if (decision?.type !== "allow") return null;
 
-  return <button>Delete</button>;
-}
-```
+return <button>Delete</button>;
+}`}</Pre>
+
+</CodeBlock>
 
 Return values:
 
-```ts
-{
+<CodeBlock title="Result Type">
+  <Pre>{`{
   status: ("idle" | "loading" | "done", decision, context);
-}
-```
+}`}</Pre>
+</CodeBlock>
 
 ---
 
@@ -78,17 +81,18 @@ Return values:
 
 Higher-order component wrapper.
 
-```tsx
-import { protect } from "authrail";
+<CodeBlock title="HOC Usage">
+<Pre>{`import { protect } from "authrail";
 
 const ProtectedAdmin = protect(
-  adminRail,
-  () => ({ user }),
-  (to) => navigate(to),
+adminRail,
+() => ({ user }),
+(to) => navigate(to),
+
   <div>Checking...</div>,
   <div>Denied</div>,
-)(AdminPage);
-```
+)(AdminPage);`}</Pre>
+</CodeBlock>
 
 Arguments:
 

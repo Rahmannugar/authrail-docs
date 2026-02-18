@@ -1,21 +1,17 @@
 {
-  "nav": [
-    {
-      "title": "Getting Started",
-      "pages": ["getting-started"]
-    },
-    {
-      "title": "Core Concepts",
-      "pages": ["core"]
-    },
-    {
-      "title": "Integrations",
-      "pages": ["integrations"]
-    },
-    {
-      "title": "Reference",
-      "pages": ["reference"]
-    }
-  ],
-  "pages": ["getting-started", "core", "integrations", "reference"]
+  "pages": [
+    "introduction",
+    "quick-start",
+    "---Core & Concepts---",
+    "core-concepts",
+    "middleware",
+    "advanced-patterns",
+    "---Integrations---",
+    "react-integration",
+    "server-usage",
+    "---Reference---",
+    "api-reference",
+    "debugging",
+    "clarifications"
+  ]
 }

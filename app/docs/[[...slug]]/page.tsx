@@ -1,5 +1,11 @@
 import { notFound, redirect } from "next/navigation";
 import { source } from "@/lib/source";
+import {
+  DocsPage,
+  DocsBody,
+  DocsTitle,
+  DocsDescription,
+} from "fumadocs-ui/page";
 import type { Metadata } from "next";
 
 export default async function Page({
@@ -28,11 +34,13 @@ export default async function Page({
   const Content = page.data.body;
 
   return (
-    <div className="prose prose-invert max-w-3xl px-6 py-12">
-      <h1 className="text-3xl font-bold mb-4">{page.data.title}</h1>
-      <p className="text-gray-500 mb-8">{page.data.description}</p>
-      <Content />
-    </div>
+    <DocsPage toc={page.data.toc} full={page.data.full}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <Content />
+      </DocsBody>
+    </DocsPage>
   );
 }
 

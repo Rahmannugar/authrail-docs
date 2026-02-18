@@ -3,15 +3,17 @@ title: Introduction
 description: The type-safe policy engine for modern applications.
 ---
 
+import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
+
 # Introduction
 
-**AuthRail** is a deterministic, framework-agnostic policy engine built for the modern web. It allows you to define, test, and execute authorization logic with complete type safety.
+**<span className="text-fd-primary">Auth</span>Rail** is a deterministic, framework-agnostic policy engine built for the modern web. It allows you to define, test, and execute authorization logic with complete type safety.
 
 Unlike traditional role-based access control (RBAC) systems that are often tightly coupled to database schemas or specific frameworks, AuthRail treats authorization as a pure function:
 
-```ts
-(Context) => Decision;
-```
+<CodeBlock title="Signature">
+  <Pre>{"(Context) => Decision;"}</Pre>
+</CodeBlock>
 
 You provide the context (user, resource, environment), and AuthRail provides the decision (`allow`, `deny`, or `redirect`).
 
@@ -22,7 +24,7 @@ Most authorization solutions are either too simple (boolean flags) or too comple
 - **Type-Safe**: Built with TypeScript first. Your context and rules are fully typed.
 - **Sequential Evaluation**: Middleware runs in a defined order. No race conditions, no surprises.
 - **Zero Magic**: No hidden state, no database calls, no side effects. You control the data.
-- **Framework Agnostic**: Works in Next.js, Remix, Express, Cloudflare Workers, or generic Node.js.
+- **Framework Agnostic**: Works in React, Next.js, Remix, Express, Cloudflare Workers, or generic Node.js.
 
 ## The Mental Model
 
@@ -69,4 +71,4 @@ if (result.decision.type === "deny") {
 - **Not an Authentication Provider**: We don't handle login, OAuth, or passwords. We work _with_ your existing auth (Clerk, Auth0, NextAuth).
 - **Not a Database**: We don't store user roles or permissions. You pass them in via context.
 
-Ready to build? Check out the [Quick Start](/docs/getting-started/quick-start) guide.
+Ready to build? Check out the [Quick Start](/docs/quick-start) guide.

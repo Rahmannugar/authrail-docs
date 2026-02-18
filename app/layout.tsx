@@ -30,7 +30,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-black text-zinc-200 antialiased font-sans">
-        <div className="pt-16">{children}</div>
+        <div>{children}</div>
       </body>
     </html>
   );
