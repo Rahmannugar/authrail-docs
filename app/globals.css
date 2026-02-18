@@ -35,13 +35,13 @@
   --fd-border: #27272a;
   --fd-input: #27272a;
 
-  --font-inter: "Inter", system-ui, sans-serif;
+  --font-space-grotesk: var(--font-space-grotesk), system-ui, sans-serif;
 }
 
 body {
   background: var(--fd-background);
   color: var(--fd-foreground);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-space-grotesk);
 }
 
 .text-fd-primary {

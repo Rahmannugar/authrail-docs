@@ -1,10 +1,11 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
+import Script from "next/script";
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-space-grotesk",
   display: "swap",
 });
 
@@ -24,7 +25,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning>
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-CJ7X6VERRN"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-CJ7X6VERRN');
+        `}
+      </Script>
       <body className="bg-black text-zinc-200 antialiased font-sans dark">
         {children}
       </body>

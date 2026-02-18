@@ -77,12 +77,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         tree={enhancedTree}
         nav={{
           title: (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <Image
                 src="/authrail.png"
                 alt="AuthRail"
-                width={32}
-                height={32}
+                width={40}
+                height={40}
                 className="object-contain"
                 priority
               />

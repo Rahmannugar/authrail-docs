@@ -22,7 +22,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-7xl font-bold tracking-tighter mb-8 text-black"
+            className="text-5xl md:text-7xl font-black tracking-tighter mb-8 text-black"
           >
             Deterministic authorization <br />
             <span className="text-black">for web applications.</span>
@@ -32,7 +32,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-md md:text-lg text-black/90 max-w-2xl mx-auto mb-0 leading-relaxed font-semibold"
+            className="md:text-lg text-white/80 font-light max-w-2xl mx-auto mb-0 leading-relaxed"
           >
             AuthRail is a framework-agnostic, deterministic policy engine that
             evaluates composable middleware in strict order and returns a single
