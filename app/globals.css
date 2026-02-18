@@ -74,48 +74,53 @@ button[aria-label="Switch Theme"],
 }
 
 /* Code Block Styling */
-figure[data-rehype-pretty-code-figure] {
+[data-rehype-pretty-code-fragment],
+figure[data-rehype-pretty-code-figure],
+.fd-codeblock {
   margin: 1.5rem 0 !important;
-}
-
-figure[data-rehype-pretty-code-figure] pre {
-  padding: 1.5rem !important;
   background-color: #0c0c0c !important;
   border: 1px solid var(--fd-border);
-  border-radius: 8px;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+[data-rehype-pretty-code-fragment] pre,
+figure[data-rehype-pretty-code-figure] pre,
+.fd-codeblock pre {
+  padding: 1.5rem !important;
+  margin: 0 !important;
+  background-color: transparent !important;
+  border: none !important;
   overflow-x: auto;
 }
 
-.fd-codeblock {
-  margin: 1.5rem 0 !important;
-  border-radius: 8px;
-  overflow: hidden;
+/* Target internal code element if present */
+[data-rehype-pretty-code-fragment] pre code,
+figure[data-rehype-pretty-code-figure] pre code,
+.fd-codeblock pre code {
+  padding: 0 !important;
+  display: block;
 }
 
-.fd-codeblock pre {
-  padding: 1.5rem !important;
-  background-color: #0c0c0c !important;
-}
-
+/* Force Pointer Cursor on all buttons in documentation */
 [data-rehype-pretty-code-figure] button,
+[data-rehype-pretty-code-fragment] button,
 .fd-codeblock button,
 .fd-sidebar-item button,
-button.fd-button {
-  cursor: pointer !important;
-}
-
-/* Ensure any element acting as a button or with specific aria-labels has pointer cursor */
+.fd-copy-button,
+button.fd-button,
 button[aria-label*="copy"],
-button[aria-label*="Copy"],
-.fd-copy-button {
+button[aria-label*="Copy"] {
   cursor: pointer !important;
+  display: inline-flex !important;
 }
 
-div[data-rehype-pretty-code-fragment] {
-  background-color: #0c0c0c !important;
-  border: 1px solid var(--fd-border);
-  border-radius: 8px;
-  overflow: hidden;
+/* Inner SVG and other elements should not interfere with cursor */
+[data-rehype-pretty-code-figure] button *,
+[data-rehype-pretty-code-fragment] button *,
+.fd-codeblock button * {
+  cursor: pointer !important;
+  pointer-events: none !important;
 }
 
 .fd-sidebar-footer {
