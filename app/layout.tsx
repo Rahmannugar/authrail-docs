@@ -11,8 +11,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://authrail.vercel.app"),
   title: {
-    default: "AuthRail",
-    template: "%s | AuthRail",
+    default: "Authrail Docs",
+    template: "%s - Authrail Docs",
   },
   description:
     "Framework-agnostic, deterministic policy engine for web applications.",

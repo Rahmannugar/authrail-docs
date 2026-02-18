@@ -12,3 +12,5 @@ Instead of coupling authorization rules to your database schema or a specific fr
 
 - **NPM Package**: [authrail](https://www.npmjs.com/package/authrail)
 - **Core Repository**: [Rahmannugar/auth-rail](https://github.com/Rahmannugar/auth-rail)
+
+

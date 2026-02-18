@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 const Navbar = () => {
@@ -29,12 +29,11 @@ const Navbar = () => {
   return (
     <>
       <motion.nav
-        style={{
-          backgroundColor: `rgba(0, 0, 0, ${scrolled ? 0.8 : 0})`,
-          backdropFilter: scrolled ? "blur(12px)" : "blur(0px)",
-          borderColor: `rgba(255, 255, 255, ${scrolled ? 0.05 : 0})`,
-        }}
-        className="fixed top-0 left-0 right-0 z-50 transition-colors duration-300 border-b border-transparent"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
+          scrolled
+            ? "bg-black/80 backdrop-blur-md border-white/5"
+            : "bg-transparent border-transparent"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link
@@ -50,9 +49,15 @@ const Navbar = () => {
                 priority
               />
             </div>
-            <span className="font-bold text-xl tracking-tighter">
-              <span className="text-[#ff6a00]">Auth</span>
-              <span className="text-white group-hover:text-white/80 transition-colors">
+            <span
+              className={`font-bold text-xl tracking-tighter ${
+                scrolled ? "text-white" : "text-black"
+              }`}
+            >
+              <span className={scrolled ? "text-[#d45100]" : "text-black"}>
+                Auth
+              </span>
+              <span className="group-hover:opacity-80 transition-colors">
                 Rail
               </span>
             </span>
@@ -63,7 +68,11 @@ const Navbar = () => {
             <a
               href="https://github.com/Rahmannugar/auth-rail"
               target="_blank"
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-105 transition-all duration-300 text-sm font-medium cursor-pointer"
+              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-300 text-sm font-medium cursor-pointer ${
+                scrolled
+                  ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
+                  : "border-black/10 bg-black/5 text-black hover:bg-black/10"
+              }`}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -81,7 +90,9 @@ const Navbar = () => {
 
             <Link
               href="/docs"
-              className="px-4 py-2 rounded-full bg-white text-black font-semibold hover:opacity-90 hover:scale-105 transition-all duration-300 text-sm cursor-pointer"
+              className={`px-4 py-2 rounded-full font-semibold hover:opacity-90 hover:scale-105 transition-all duration-300 text-sm cursor-pointer ${
+                scrolled ? "bg-white text-black" : "bg-black text-white"
+              }`}
             >
               Get Started
             </Link>
@@ -90,7 +101,11 @@ const Navbar = () => {
           {/* Mobile Hamburger Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden z-50 p-2 text-white hover:text-orange-500 transition-colors"
+            className={`md:hidden z-50 p-2 transition-colors ${
+              scrolled || mobileMenuOpen
+                ? "text-white hover:text-white/60"
+                : "text-black hover:text-black/60"
+            }`}
           >
             {mobileMenuOpen ? (
               <svg
