@@ -1,6 +1,7 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { source } from "@/lib/source";
+import Image from "next/image";
 import {
   Rocket,
   BookOpen,
@@ -10,8 +11,8 @@ import {
   Zap,
   Server,
   Cpu,
+  Atom,
 } from "lucide-react";
-// Infer types from source to avoid import issues
 type PageTreeRoot = typeof source.pageTree;
 type PageTreeNode = PageTreeRoot["children"][number];
 
@@ -30,6 +31,8 @@ const icons: Record<string, React.ReactNode> = {
   debugging: <ShieldCheck size={18} />,
   clarifications: <BookOpen size={18} />,
   "api-reference": <Library size={18} />,
+  "react-integration": <Atom size={18} />,
+  react: <Atom size={18} />,
 };
 
 function enhanceTree(tree: PageTreeRoot): PageTreeRoot {
@@ -44,12 +47,10 @@ function enhanceTree(tree: PageTreeRoot): PageTreeRoot {
 
       let icon = icons[key || ""];
 
-      // Fallback for tricky folder names if needed
       if (!icon && n.type === "folder" && n.name === "Core & Concepts") {
         icon = icons["core"];
       }
 
-      // Cast to any to inject icon if types prevent it
       const newNode: any = { ...node };
       if (icon) newNode.icon = icon;
 
@@ -58,7 +59,6 @@ function enhanceTree(tree: PageTreeRoot): PageTreeRoot {
       }
       return newNode;
     }
-    return node;
     return node;
   }
 
@@ -77,7 +77,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         tree={enhancedTree}
         nav={{
           title: (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
+              <Image
+                src="/authrail.png"
+                alt="AuthRail Logo"
+                width={48}
+                height={48}
+                className="object-contain"
+              />
               <span className="font-bold text-lg">
                 <span className="text-fd-primary">Auth</span>Rail
               </span>
@@ -85,7 +92,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           ),
         }}
         sidebar={{
-          footer: <></>, // Use Fragment to ensure completely empty
+          footer: <></>,
         }}
       >
         {children}

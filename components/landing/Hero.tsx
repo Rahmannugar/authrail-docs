@@ -23,7 +23,7 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-4xl md:text-7xl font-bold tracking-tighter mb-8 bg-clip-text text-transparent bg-linear-to-b from-white to-white/60"
         >
-          <span className="text-orange-500">Deterministic</span> authorization{" "}
+          <span className="text-[#ff6a00]">Deterministic</span> authorization{" "}
           <br />
           <span className="text-zinc-400">for web applications.</span>
         </motion.h1>
@@ -34,9 +34,12 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-12 leading-relaxed"
         >
-          AuthRail is a framework-agnostic, deterministic policy engine that
-          evaluates composable middleware in strict order and returns a single
-          decision: allow, deny, or redirect.
+          <span className="font-semibold text-white">
+            <span className="text-[#ff6a00]">Auth</span>Rail
+          </span>{" "}
+          is a framework-agnostic, deterministic policy engine that evaluates
+          composable middleware in strict order and returns a single decision:
+          allow, deny, or redirect.
         </motion.p>
 
         <motion.div

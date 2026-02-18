@@ -39,9 +39,9 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-2 group cursor-pointer z-50 relative"
+            className="flex items-center gap-0 group cursor-pointer z-50 relative"
           >
-            <div className="relative w-14 h-14 lg:w-16 lg:h-16 hover:scale-110 transition-transform duration-300">
+            <div className="relative w-14 h-14 hover:scale-110 transition-transform duration-300">
               <Image
                 src="/authrail.png"
                 alt="AuthRail"
@@ -50,6 +50,12 @@ const Navbar = () => {
                 priority
               />
             </div>
+            <span className="font-bold text-xl tracking-tighter">
+              <span className="text-[#ff6a00]">Auth</span>
+              <span className="text-white group-hover:text-white/80 transition-colors">
+                Rail
+              </span>
+            </span>
           </Link>
 
           {/* Desktop Menu */}

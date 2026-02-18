@@ -3,6 +3,8 @@ title: Advanced Patterns
 description: Practical patterns for composing policies.
 ---
 
+import { CodeBlock } from "fumadocs-ui/components/codeblock";
+
 # Advanced Patterns
 
 This section covers patterns commonly used in real applications.
@@ -13,6 +15,7 @@ This section covers patterns commonly used in real applications.
 
 You can layer middleware to separate concerns.
 
+<CodeBlock>
 ```ts
 createRail("admin", [
   requireAuth("/login"),
@@ -20,6 +23,7 @@ createRail("admin", [
   allowIf((ctx) => ctx.accountVerified),
 ]);
 ```
+</CodeBlock>
 
 Each middleware handles one responsibility.
 
@@ -35,27 +39,33 @@ Execution remains strictly sequential.
 
 Middleware can enrich context before later middleware runs.
 
+<CodeBlock>
 ```ts
 const attachPermissions = async (ctx) => {
   if (!ctx.user) return;
 
-  const permissions = await getPermissions(ctx.user.id);
+const permissions = await getPermissions(ctx.user.id);
 
-  return {
-    context: { permissions },
-  };
+return {
+context: { permissions },
 };
-```
+};
+
+````
+</CodeBlock>
 
 Usage:
 
+<CodeBlock>
 ```ts
 createRail("billing", [
   requireAuth("/login"),
   attachPermissions,
   allowIf((ctx) => ctx.permissions?.canAccessBilling),
 ]);
-```
+````
+
+</CodeBlock>
 
 Returned `context` values are shallow-merged before the next middleware executes.
 
@@ -65,6 +75,7 @@ Returned `context` values are shallow-merged before the next middleware executes
 
 Middleware can perform structured redirect flows.
 
+<CodeBlock>
 ```ts
 const onboardingRail = createRail("onboarding", [
   (ctx) => {
@@ -83,6 +94,7 @@ const onboardingRail = createRail("onboarding", [
   },
 ]);
 ```
+</CodeBlock>
 
 Only the first matching redirect executes.
 
@@ -92,12 +104,14 @@ Only the first matching redirect executes.
 
 Feature gating is straightforward.
 
+<CodeBlock>
 ```ts
 const featureRail = createRail("feature", [
   requireAuth("/login"),
   allowIf((ctx) => ctx.featureFlags?.newDashboard === true),
 ]);
 ```
+</CodeBlock>
 
 Feature flags remain external.
 AuthRail evaluates them.
@@ -108,19 +122,19 @@ AuthRail evaluates them.
 
 Middleware can be parameterized.
 
+<CodeBlock>
 ```ts
 const requireFeature = (featureName: string) =>
   allowIf((ctx) => ctx.features?.[featureName] === true);
 ```
+</CodeBlock>
 
 Usage:
 
-```ts
-createRail("beta", [
-  requireAuth("/login"),
-  requireFeature("betaAccess"),
-]);
-```
+<CodeBlock>
+  ```ts createRail("beta", [ requireAuth("/login"),
+  requireFeature("betaAccess"), ]); ```
+</CodeBlock>
 
 ---
 
@@ -128,12 +142,16 @@ createRail("beta", [
 
 You can evaluate one rail inside another if needed.
 
+<CodeBlock>
 ```ts
 const result = await adminRail.evaluate(ctx);
 
 if (result.decision.type !== "allow") {
-  return result;
+return result;
 }
+
 ```
+</CodeBlock>
 
 Rails are plain objects in AuthRail, leaving composition to be explicit.
+```

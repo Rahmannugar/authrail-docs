@@ -3,6 +3,8 @@ title: Clarifications
 description: Technical clarifications and constraints.
 ---
 
+import { CodeBlock } from "fumadocs-ui/components/codeblock";
+
 # Clarifications
 
 This page documents explicit constraints of the system.
@@ -64,15 +66,17 @@ There is no:
 Middleware receives:
 
 ```ts
-Readonly<Ctx>
+Readonly<Ctx>;
 ```
 
 Direct mutation is discouraged.
 
 If enrichment is needed:
 
+<CodeBlock>
 ```ts
 return { context: { ... } };
 ```
+</CodeBlock>
 
 Context merging is shallow.

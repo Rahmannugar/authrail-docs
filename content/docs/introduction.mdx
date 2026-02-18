@@ -3,7 +3,7 @@ title: Introduction
 description: The type-safe policy engine for modern applications.
 ---
 
-import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
+import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
 # Introduction
 
@@ -12,7 +12,9 @@ import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
 Unlike traditional role-based access control (RBAC) systems that are often tightly coupled to database schemas or specific frameworks, AuthRail treats authorization as a pure function:
 
 <CodeBlock title="Signature">
-  <Pre>{"(Context) => Decision;"}</Pre>
+```ts
+(Context) => Decision;
+```
 </CodeBlock>
 
 You provide the context (user, resource, environment), and AuthRail provides the decision (`allow`, `deny`, or `redirect`).
@@ -39,36 +41,40 @@ Think of AuthRail as a series of gates (middleware) that a request must pass thr
 
 ## Example
 
-```ts icon="typescript"
+<CodeBlock title="example.ts">
+```ts
 import { createRail, requireAuth, requireRole } from "authrail";
 
 // 1. Define a Rail
 const adminRail = createRail("admin", [
-  requireAuth("/login"), // Stops here if not authenticated
-  requireRole("admin"), // Stops here if not an admin
+requireAuth("/login"), // Stops here if not authenticated
+requireRole("admin"), // Stops here if not an admin
 ]);
 
 // 2. Evaluate
 const result = await adminRail.evaluate({
-  user: currentUser,
-  path: "/dashboard/settings",
+user: currentUser,
+path: "/dashboard/settings",
 });
 
 // 3. Act
 if (result.decision.type === "redirect") {
-  return redirect(result.decision.to);
+return redirect(result.decision.to);
 }
 
 if (result.decision.type === "deny") {
-  throw new ForbiddenError();
+throw new ForbiddenError();
 }
 
-// Proceed...
+//proceed to next defined context
+
 ```
+</CodeBlock>
 
 ## What AuthRail is Not
 
 - **Not an Authentication Provider**: We don't handle login, OAuth, or passwords. We work _with_ your existing auth (Clerk, Auth0, NextAuth).
 - **Not a Database**: We don't store user roles or permissions. You pass them in via context.
 
-Ready to build? Check out the [Quick Start](/docs/quick-start) guide.
+Ready to build? Check out the [**<span className="text-fd-primary">Quick Start</span>**](/docs/quick-start) guide.
+```

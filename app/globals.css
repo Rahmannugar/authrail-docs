@@ -64,22 +64,61 @@ a[data-active="true"],
   border-right: 1px solid var(--fd-border);
 }
 
-.fd-theme-toggle {
+.fd-theme-toggle,
+button[aria-label="Toggle Theme"],
+button[aria-label="Switch Theme"],
+[data-theme-toggle] {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Code Block Styling */
+figure[data-rehype-pretty-code-figure] {
+  margin: 1.5rem 0 !important;
 }
 
 figure[data-rehype-pretty-code-figure] pre {
-  padding: 0.5rem 0 !important;
+  padding: 1.5rem !important;
+  background-color: #0c0c0c !important;
+  border: 1px solid var(--fd-border);
+  border-radius: 8px;
+  overflow-x: auto;
 }
 
 .fd-codeblock {
-  margin: 0 !important;
+  margin: 1.5rem 0 !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fd-codeblock pre {
+  padding: 1.5rem !important;
+  background-color: #0c0c0c !important;
+}
+
+[data-rehype-pretty-code-figure] button,
+.fd-codeblock button,
+.fd-sidebar-item button,
+button.fd-button {
+  cursor: pointer !important;
+}
+
+/* Ensure any element acting as a button or with specific aria-labels has pointer cursor */
+button[aria-label*="copy"],
+button[aria-label*="Copy"],
+.fd-copy-button {
+  cursor: pointer !important;
 }
 
 div[data-rehype-pretty-code-fragment] {
-  background-color: #0a0a0a !important;
+  background-color: #0c0c0c !important;
+  border: 1px solid var(--fd-border);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .fd-sidebar-footer {
-  border-top: none !important;
+  display: none !important;
+  border: none !important;
 }

@@ -3,7 +3,7 @@ title: API Reference
 description: Complete API surface of AuthRail.
 ---
 
-import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
+import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
 # API Reference
 
@@ -14,13 +14,15 @@ This section documents the public API of AuthRail.
 ## createRail
 
 <CodeBlock title="Signature">
-  <Pre>{`createRail<Ctx>(
+```ts
+createRail<Ctx>(
   name: string,
   middleware: Middleware<Ctx>[],
   options?: {
     debug?: boolean;
   }
-): Rail<Ctx>`}</Pre>
+): Rail<Ctx>
+```
 </CodeBlock>
 
 Creates a new rail instance.
@@ -34,10 +36,12 @@ Parameters:
 Returns:
 
 <CodeBlock title="Rail Interface">
-  <Pre>{`{
+```ts
+{
   name: string;
   evaluate(ctx: Ctx): Promise<RailResult<Ctx>>;
-}`}</Pre>
+}
+```
 </CodeBlock>
 
 ---
@@ -45,20 +49,24 @@ Returns:
 ## Rail.evaluate
 
 <CodeBlock title="Signature">
-  <Pre>{`rail.evaluate(context: Ctx): Promise<RailResult<Ctx>>`}</Pre>
+```ts
+rail.evaluate(context: Ctx): Promise<RailResult<Ctx>>
+```
 </CodeBlock>
 
 Evaluates middleware sequentially and returns:
 
 <CodeBlock title="RailResult">
-  <Pre>{`type RailResult<Ctx> = {
+```ts
+type RailResult<Ctx> = {
   decision: {
     type: "allow" | "deny" | "redirect";
     to?: string;
     reason?: string;
   };
   context: Ctx;
-};`}</Pre>
+};
+```
 </CodeBlock>
 
 Evaluation is always asynchronous.
@@ -68,22 +76,26 @@ Evaluation is always asynchronous.
 ## Middleware
 
 <CodeBlock title="Type Definition">
-  <Pre>{`type Middleware<Ctx> =
+```ts
+type Middleware<Ctx> =
   | ((ctx: Readonly<Ctx>) =>
       | MiddlewareResult<Ctx>
       | void
-      | Promise<MiddlewareResult<Ctx> | void>);`}</Pre>
+      | Promise<MiddlewareResult<Ctx> | void>);
+```
 </CodeBlock>
 
 <CodeBlock title="Result Type">
-  <Pre>{`type MiddlewareResult<Ctx> = {
+```ts
+type MiddlewareResult<Ctx> = {
   decision?: {
     type: "allow" | "deny" | "redirect";
     to?: string;
     reason?: string;
   };
   context?: Partial<Ctx>;
-};`}</Pre>
+};
+```
 </CodeBlock>
 
 Rules:
@@ -97,7 +109,7 @@ Rules:
 ## requireAuth
 
 <CodeBlock title="Helper">
-  <Pre>{`requireAuth(redirectTo: string): Middleware`}</Pre>
+  ```ts requireAuth(redirectTo: string): Middleware ```
 </CodeBlock>
 
 Redirects if `ctx.user` is falsy.
@@ -107,7 +119,7 @@ Redirects if `ctx.user` is falsy.
 ## requireRole
 
 <CodeBlock title="Helper">
-  <Pre>{`requireRole(role: string): Middleware`}</Pre>
+  ```ts requireRole(role: string): Middleware ```
 </CodeBlock>
 
 Denies if `ctx.user.role` does not match.
@@ -117,7 +129,9 @@ Denies if `ctx.user.role` does not match.
 ## allowIf
 
 <CodeBlock title="Helper">
-  <Pre>{`allowIf(predicate: (ctx: Ctx) => boolean): Middleware`}</Pre>
+```ts
+allowIf(predicate: (ctx: Ctx) => boolean): Middleware
+```
 </CodeBlock>
 
 Denies if predicate returns `false`.
@@ -127,7 +141,9 @@ Denies if predicate returns `false`.
 ## blockIf
 
 <CodeBlock title="Helper">
-  <Pre>{`blockIf(predicate: (ctx: Ctx) => boolean): Middleware`}</Pre>
+```ts
+blockIf(predicate: (ctx: Ctx) => boolean): Middleware
+```
 </CodeBlock>
 
 Denies if predicate returns `true`.
@@ -141,7 +157,8 @@ These are optional helpers for React environments.
 ### RailBoundary
 
 <CodeBlock title="Props">
-  <Pre>{`<RailBoundary
+```tsx
+<RailBoundary
   rail={rail}
   context={ctx}
   fallback={ReactNode}
@@ -149,7 +166,8 @@ These are optional helpers for React environments.
   onRedirect={(to) => void}
 >
   {children}
-</RailBoundary>`}</Pre>
+</RailBoundary>
+```
 </CodeBlock>
 
 Evaluates a rail and renders based on decision.
@@ -158,18 +176,18 @@ Evaluates a rail and renders based on decision.
 
 ### useRail
 
-<CodeBlock title="Hook">
-  <Pre>{`useRail(rail, context)`}</Pre>
-</CodeBlock>
+<CodeBlock title="Hook">```ts useRail(rail, context) ```</CodeBlock>
 
 Returns:
 
 <CodeBlock title="Result">
-  <Pre>{`{
+```ts
+{
   status: "idle" | "loading" | "done";
   decision;
   context;
-}`}</Pre>
+}
+```
 </CodeBlock>
 
 ---
@@ -177,13 +195,8 @@ Returns:
 ### protect
 
 <CodeBlock title="HOC">
-  <Pre>{`protect(
-  rail,
-  getContext,
-  onRedirect?,
-  fallback?,
-  denied?
-)(Component)`}</Pre>
+  ```ts protect( rail, getContext, onRedirect?, fallback?, denied? )(Component)
+  ```
 </CodeBlock>
 
 Higher-order component wrapper for route-level protection.

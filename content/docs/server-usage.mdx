@@ -3,6 +3,8 @@ title: Server Usage
 description: Using the core engine in Node.js or server environments.
 ---
 
+import { CodeBlock } from "fumadocs-ui/components/codeblock";
+
 # Server Usage
 
 The AuthRail core engine is framework-neutral.
@@ -21,28 +23,34 @@ There are no React dependencies in the core evaluation logic.
 
 ## Basic Example (Node.js)
 
+<CodeBlock>
 ```ts
 import { createRail, requireAuth, requireRole } from "authrail";
 
 const adminRail = createRail("admin", [
-  requireAuth("/login"),
-  requireRole("admin"),
+requireAuth("/login"),
+requireRole("admin"),
 ]);
 
 const result = await adminRail.evaluate({
-  user: req.user,
+user: req.user,
 });
-```
+
+````
+</CodeBlock>
 
 Handle the decision:
 
+<CodeBlock>
 ```ts
 if (result.decision.type !== "allow") {
   return res.status(403).json({ error: "Forbidden" });
 }
 
 next();
-```
+````
+
+</CodeBlock>
 
 AuthRail emits a decision.
 Your API decides how to respond.
@@ -51,19 +59,22 @@ Your API decides how to respond.
 
 ## Express Example
 
+<CodeBlock>
 ```ts
 app.get("/admin", async (req, res) => {
   const result = await adminRail.evaluate({
     user: req.user,
   });
 
-  if (result.decision.type !== "allow") {
-    return res.status(403).send("Forbidden");
-  }
+if (result.decision.type !== "allow") {
+return res.status(403).send("Forbidden");
+}
 
-  res.send("Admin panel");
+res.send("Admin panel");
 });
-```
+
+````
+</CodeBlock>
 
 AuthRail acts as a policy engine across every environment.
 
@@ -80,12 +91,15 @@ the same rail definition can be reused:
 
 Example:
 
+<CodeBlock>
 ```ts
 // shared/policies.ts
 export const adminRail = createRail("admin", [
   requireAuth("/login"),
   requireRole("admin"),
 ]);
-```
+````
+
+</CodeBlock>
 
 This allows consistent authorization logic across environments.

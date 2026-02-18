@@ -2,19 +2,12 @@
 
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
-import React from "react";
-import { AnimatePresence, motion } from "motion/react";
-import LoadingScreen from "@/components/landing/LoadingScreen";
+import { motion } from "motion/react";
 
 const Home = () => {
-  const [loading, setLoading] = React.useState(true);
 
   return (
     <main className="min-h-screen flex flex-col bg-black text-white selection:bg-orange-500/30">
-      <AnimatePresence mode="wait">
-        {loading ? (
-          <LoadingScreen key="loader" onComplete={() => setLoading(false)} />
-        ) : (
           <motion.div
             key="content"
             initial={{ opacity: 0 }}
@@ -25,8 +18,6 @@ const Home = () => {
             <Navbar />
             <Hero />
           </motion.div>
-        )}
-      </AnimatePresence>
     </main>
   );
 };

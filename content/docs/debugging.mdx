@@ -3,6 +3,8 @@ title: Debugging
 description: Inspecting rail evaluation.
 ---
 
+import { CodeBlock } from "fumadocs-ui/components/codeblock";
+
 # Debugging
 
 AuthRail can emit evaluation logs when debug mode is enabled.
@@ -11,19 +13,23 @@ AuthRail can emit evaluation logs when debug mode is enabled.
 
 ## Enabling Debug Mode
 
+<CodeBlock>
 ```ts
 createRail("admin", middleware, { debug: true });
 ```
+</CodeBlock>
 
 When enabled, each middleware execution is logged.
 
 Example output:
 
+<CodeBlock>
 ```text
 [AuthRail:admin] → requireAuthMiddleware
 [AuthRail:admin] → requireRoleMiddleware
 [AuthRail:admin] decision → allow
 ```
+</CodeBlock>
 
 ---
 

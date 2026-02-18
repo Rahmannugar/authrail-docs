@@ -3,7 +3,7 @@ title: React Integration
 description: Using AuthRail in React applications.
 ---
 
-import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
+import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
 # React Integration
 
@@ -23,7 +23,8 @@ These utilities are thin wrappers around `rail.evaluate`.
 `RailBoundary` evaluates a rail and renders conditionally.
 
 <CodeBlock title="Usage">
-<Pre>{`import { RailBoundary } from "authrail";
+```tsx
+import { RailBoundary } from "authrail";
 
 <RailBoundary
   rail={adminRail}
@@ -33,7 +34,8 @@ These utilities are thin wrappers around `rail.evaluate`.
   onRedirect={(to) => navigate(to)}
 >
   <AdminPanel />
-</RailBoundary>;`}</Pre>
+</RailBoundary>;
+```
 </CodeBlock>
 
 Props:
@@ -54,7 +56,8 @@ It emits redirect intent through `onRedirect`.
 For imperative evaluation inside components.
 
 <CodeBlock title="Component">
-<Pre>{`import { useRail } from "authrail";
+```tsx
+import { useRail } from "authrail";
 
 function DeleteButton({ user }) {
 const { decision, status } = useRail(adminRail, { user });
@@ -63,16 +66,22 @@ if (status === "loading") return null;
 if (decision?.type !== "allow") return null;
 
 return <button>Delete</button>;
-}`}</Pre>
+}
 
+````
 </CodeBlock>
 
 Return values:
 
 <CodeBlock title="Result Type">
-  <Pre>{`{
-  status: ("idle" | "loading" | "done", decision, context);
-}`}</Pre>
+```ts
+{
+  status: "idle" | "loading" | "done";
+  decision: Decision | null;
+  context: Ctx | null;
+}
+````
+
 </CodeBlock>
 
 ---
@@ -82,7 +91,8 @@ Return values:
 Higher-order component wrapper.
 
 <CodeBlock title="HOC Usage">
-<Pre>{`import { protect } from "authrail";
+```tsx
+import { protect } from "authrail";
 
 const ProtectedAdmin = protect(
 adminRail,
@@ -91,7 +101,8 @@ adminRail,
 
   <div>Checking...</div>,
   <div>Denied</div>,
-)(AdminPage);`}</Pre>
+)(AdminPage);
+```
 </CodeBlock>
 
 Arguments:

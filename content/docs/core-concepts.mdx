@@ -3,6 +3,8 @@ title: Core Concepts
 description: How AuthRail evaluates middleware.
 ---
 
+import { CodeBlock } from "fumadocs-ui/components/codeblock";
+
 # Core Concepts
 
 AuthRail is built around three primitives:
@@ -19,16 +21,16 @@ Understanding these explains the entire system.
 
 A rail is a named collection of ordered middleware.
 
+<CodeBlock>
 ```ts
 createRail<Ctx>(name: string, middleware: Middleware<Ctx>[])
 ```
+</CodeBlock>
 
 A rail does not execute automatically.
 It must be evaluated explicitly:
 
-```ts
-await rail.evaluate(context);
-```
+<CodeBlock>```ts await rail.evaluate(context); ```</CodeBlock>
 
 Each evaluation is independent.
 
@@ -38,6 +40,7 @@ Each evaluation is independent.
 
 Middleware is a function that receives context and may return:
 
+<CodeBlock>
 ```ts
 type MiddlewareResult<Ctx> = {
   decision?: {
@@ -47,14 +50,17 @@ type MiddlewareResult<Ctx> = {
   context?: Partial<Ctx>;
 };
 ```
+</CodeBlock>
 
 Signature:
 
+<CodeBlock>
 ```ts
 type Middleware<Ctx> = (
   ctx: Readonly<Ctx>
 ) => Promise<MiddlewareResult<Ctx> | void> | MiddlewareResult<Ctx> | void;
 ```
+</CodeBlock>
 
 Middleware can:
 
@@ -70,13 +76,9 @@ Middleware runs strictly in array order.
 
 Given:
 
-```ts
-createRail("example", [
-  middlewareA,
-  middlewareB,
-  middlewareC,
-]);
-```
+<CodeBlock>
+  ```ts createRail("example", [ middlewareA, middlewareB, middlewareC, ]); ```
+</CodeBlock>
 
 Execution flow:
 
@@ -96,23 +98,28 @@ There is no reordering.
 
 Middleware may return additional context:
 
+<CodeBlock>
 ```ts
 return {
   context: { permissions }
 };
 ```
+</CodeBlock>
 
 Returned context is shallow-merged into the working context before the next middleware runs.
 
 Example:
 
+<CodeBlock>
 ```ts
 initialContext = { user }
 middleware1 returns { context: { permissions } }
 
 next middleware receives:
 { user, permissions }
-```
+
+````
+</CodeBlock>
 
 ---
 
@@ -121,9 +128,12 @@ next middleware receives:
 If no middleware returns a blocking decision,
 the final decision is:
 
+<CodeBlock>
 ```ts
 { type: "allow" }
-```
+````
+
+</CodeBlock>
 
 ---
 
@@ -131,6 +141,7 @@ the final decision is:
 
 Every evaluation returns:
 
+<CodeBlock>
 ```ts
 {
   decision: {
@@ -140,5 +151,6 @@ Every evaluation returns:
   context: Ctx
 }
 ```
+</CodeBlock>
 
 `context` reflects any enrichment performed during execution.
