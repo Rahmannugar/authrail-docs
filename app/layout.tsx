@@ -26,19 +26,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning>
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-CJ7X6VERRN"
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-CJ7X6VERRN"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
 
-          gtag('config', 'G-CJ7X6VERRN');
-        `}
-      </Script>
+            gtag('config', 'G-CJ7X6VERRN');
+          `}
+        </Script>
+      </head>
       <body className="bg-black text-zinc-200 antialiased font-sans dark">
         {children}
       </body>

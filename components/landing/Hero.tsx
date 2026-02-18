@@ -15,7 +15,6 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex flex-col overflow-hidden perspective-1000 bg-black">
-      {/* Top Part: Copy (Darker Premium Orange Background) */}
       <div className="flex-1 flex flex-col items-center justify-center pt-32 pb-16 px-6 bg-[#d45100]">
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           <motion.h1
@@ -41,7 +40,6 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Bottom Part: Buttons (Black Background) */}
       <div className="bg-black w-full py-16 md:py-24 px-6 border-t border-white/5">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
