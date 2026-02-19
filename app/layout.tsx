@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   },
   description:
     "Framework-agnostic, deterministic policy engine for web applications.",
+  verification: {
+    google: "dRXncglW4SWJN-X-OiOYx_8tnCxXeU5CWKQYdCJ_5hE",
+  },
 };
 
 export default function RootLayout({
