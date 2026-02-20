@@ -107,7 +107,9 @@ Rules:
 ## requireAuth
 
 <CodeBlock title="Helper">
-  ```ts requireAuth(redirectTo: string): Middleware ```
+  ```ts
+  requireAuth(redirectTo: string): Middleware
+  ```
 </CodeBlock>
 
 Redirects if `ctx.user` is falsy.
@@ -117,7 +119,9 @@ Redirects if `ctx.user` is falsy.
 ## requireRole
 
 <CodeBlock title="Helper">
-  ```ts requireRole(role: string): Middleware ```
+  ```ts
+  requireRole(role: string): Middleware
+  ```
 </CodeBlock>
 
 Denies if `ctx.user.role` does not match.

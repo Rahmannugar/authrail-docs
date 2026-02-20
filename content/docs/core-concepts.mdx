@@ -28,7 +28,11 @@ createRail<Ctx>(name: string, middleware: Middleware<Ctx>[])
 A rail does not execute automatically.
 It must be evaluated explicitly:
 
-<CodeBlock>```ts await rail.evaluate(context); ```</CodeBlock>
+<CodeBlock className="extra-padding">
+```bash
+await rail.evaluate(context);
+```
+</CodeBlock>
 
 Each evaluation is independent.
 
