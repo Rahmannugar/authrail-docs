@@ -17,6 +17,30 @@ export const metadata: Metadata = {
   },
   description:
     "Framework-agnostic, deterministic policy engine for web applications.",
+  openGraph: {
+    title: "Authrail Docs",
+    description:
+      "Framework-agnostic, deterministic policy engine for web applications.",
+    url: "https://authrail.vercel.app",
+    siteName: "Authrail Docs",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Authrail Docs",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Authrail Docs",
+    description:
+      "Framework-agnostic, deterministic policy engine for web applications.",
+    images: ["/opengraph-image.png"],
+  },
   verification: {
     google: "dRXncglW4SWJN-X-OiOYx_8tnCxXeU5CWKQYdCJ_5hE",
   },

@@ -63,21 +63,25 @@ When running the demo, try the following scenarios to see how AuthRail handle ed
 ### 1. Unauthenticated Access
 
 **Action**: Log out and try to navigate directly to `/dashboard`.
+
 **Observation**: AuthRail's `requireAuth` middleware detects the null user and emits a `redirect` decision. The application intercepts this and sends you to `/login`.
 
 ### 2. Role-Based Access Control (RBAC)
 
 **Action**: Log in as a standard user and try to click the "Admin Settings" link.
+
 **Observation**: The link might be hidden (using `RailBoundary`), but if you navigate directly to `/admin`, the `requireRole('admin')` middleware returns a `deny` decision, rendering the "Access Restricted" fallback.
 
 ### 3. Real-time Policy Updates
 
-**Action**: In the Policy Control Panel, toggle the "Emergency Lockdown" switch.
-**Observation**: Watch how even public routes can be instantly protected. This demonstrates how injecting global site state into the AuthAuth context allows for instant, site-wide policy changes.
+**Action**: In the Dashboard, toggle the "Emergency Lockdown" button.
+
+**Observation**: Watch how the protected content instantly disappears and is replaced by the lockdown fallback. This demonstrates AuthRail's reactivity—by updating the evaluation context, your `RailBoundary` or `protect()` HOC responds immediately without a page reload.
 
 ### 4. Deterministic Debugging
 
 **Action**: Open your browser's Developer Tools (Console tab).
+
 **Observation**: With `debug: true` enabled in the rail configuration, you can see every step of the evaluation. It will show exactly which check failed and what data was in the context at that moment.
 
 ---
