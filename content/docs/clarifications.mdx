@@ -1,80 +1,70 @@
 ---
-title: Clarifications
-description: Technical clarifications and constraints.
+title: Clarifications & Constraints
+description: Technical boundaries, philosphy, and explicit constraints.
 ---
 
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
-This page documents explicit constraints of the system.
+To keep AuthRail fast, predictable, and maintainable, we've made explicit architectural choices. Understanding these boundaries will help you integrate the library effectively.
 
 ---
 
-## Not an Authentication System
+## 1. Not an Authentication System
 
-AuthRail does not:
+**Constraint**: AuthRail does not handle user sessions, login flows, or password hashing.
 
-- Authenticate users
-- Manage sessions
-- Issue tokens
-- Store credentials
-
-It assumes authentication has already occurred.
+**Rationale**: Authentication is a complex, solved problem with many great providers (Clerk, Auth0, Supabase). AuthRail starts **after** the user is identified. It answers the question: _"Now that I know who this user is, what are they allowed to do?"_ This separation of concerns allows AuthRail to remain lightweight and framework-agnostic.
 
 ---
 
-## Not a Router
+## 2. Not a Router
 
-AuthRail does not:
+**Constraint**: Evaluation does not automatically trigger window navigation or history state changes.
 
-- Navigate automatically
-- Modify history state
-- Integrate with any routing library
-
-It emits redirect intent.
-Your application performs navigation.
+**Rationale**: Every framework (Next.js, Remix, React Router) handles navigation differently. By emitting a structured `redirect` decision instead of performing the redirect itself, AuthRail gives you full control over how to handle transitions, ensuring compatibility with Server Components, Edge Middleware, and SPAs.
 
 ---
 
-## No Global State
+## 3. No Global State or Side Effects
 
-Each `evaluate()` call is independent.
+**Constraint**: Individual `evaluate()` calls are independent. There is no internal caching or shared memory between rails.
 
-There is:
-
-- No shared state
-- No caching
-- No cross-request memory
+**Rationale**: Side effects make authorization logic hard to test and debug. By treating the evaluation as a pure function of `(Rail, Context) => Decision`, we ensure that your permission logic is 100% deterministic. If a check fails, it's because of the data in the context, not an invisible "stale" cache.
 
 ---
 
-## No Implicit Parallelism
+## 4. Sequential (Non-Parallel) Execution
 
-Middleware runs sequentially.
+**Constraint**: Middleware runs one by one in array order.
 
-There is no:
-
-- Parallel execution
-- Reordering
-- Lazy evaluation
+**Rationale**: Authorization often depends on a logical hierarchy. You shouldn't check a user's role before you know the user exists. Sequential execution prevents "race conditions" within your permission logic and simplifies error handling. If a check is expensive (like a DB call), it will only run if all preceding "cheap" checks have already passed.
 
 ---
 
-## Context Is Immutable
+## 5. Immutable Context (Read-Only)
 
-Middleware receives:
+**Constraint**: Middleware should never directly mutate the context object.
 
+**Rationale**: TypeScript enforces `Readonly<Ctx>` within middleware functions. Mutating shared objects in a pipeline leads to hard-to-track bugs. If you need to add data to the context, use the **Enrichment Pattern**:
+
+<CodeBlock title="Correct Enrichment">
 ```ts
-Readonly<Ctx>;
-```
+// DO THIS: Return new data to be merged
+return { 
+  context: { userData: await fetchUser() } 
+};
 
-Direct mutation is discouraged.
+// DON'T DO THIS:
+// ctx.userData = await fetchUser();
 
-If enrichment is needed:
-
-<CodeBlock>
-```ts
-return { context: { ... } };
 ```
 </CodeBlock>
 
-Context merging is shallow.
+---
+
+## 6. Shallow Context Merging
+
+**Constraint**: When middleware returns a `context` object, it is shallow-merged (`{...old, ...new}`) with the working context.
+
+**Rationale**: Deep merging is computationally expensive and can lead to unexpected results with nested arrays or objects. Keeping merging shallow forces a cleaner, flatter context structure that is easier to type and reason about.
+```

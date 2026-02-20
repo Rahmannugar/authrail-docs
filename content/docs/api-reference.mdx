@@ -107,9 +107,7 @@ Rules:
 ## requireAuth
 
 <CodeBlock title="Helper">
-  ```ts
-  requireAuth(redirectTo: string): Middleware
-  ```
+  ```ts requireAuth(redirectTo: string): Middleware ```
 </CodeBlock>
 
 Redirects if `ctx.user` is falsy.
@@ -119,9 +117,7 @@ Redirects if `ctx.user` is falsy.
 ## requireRole
 
 <CodeBlock title="Helper">
-  ```ts
-  requireRole(role: string): Middleware
-  ```
+  ```ts requireRole(role: string): Middleware ```
 </CodeBlock>
 
 Denies if `ctx.user.role` does not match.
@@ -178,27 +174,32 @@ Evaluates a rail and renders based on decision.
 
 ### useRail
 
-<CodeBlock title="Hook">```ts useRail(rail, context) ```</CodeBlock>
-
-Returns:
-
-<CodeBlock title="Result">
-```ts
-{
+<CodeBlock title="Hook Signature">
+```ts 
+useRail<Ctx>(rail: Rail<Ctx>, context: Ctx): {
   status: "idle" | "loading" | "done";
-  decision;
-  context;
+  decision: Decision | null;
+  context: Ctx | null;
 }
 ```
 </CodeBlock>
+
+Hook for imperative evaluation inside React components.
 
 ---
 
 ### protect
 
-<CodeBlock title="HOC">
-  ```ts protect( rail, getContext, onRedirect?, fallback?, denied? )(Component)
-  ```
+<CodeBlock title="HOC Signature">
+```ts 
+protect<P>(
+  rail: Rail<any>,
+  getContext: (props: P) => any,
+  onRedirect?: (to: string) => void,
+  fallback?: ReactNode,
+  denied?: ReactNode
+): (Component: ComponentType<P>) => ComponentType<P>
+```
 </CodeBlock>
 
-Higher-order component wrapper for route-level protection.
+Higher-order component wrapper for declarative route-level or component-level protection.

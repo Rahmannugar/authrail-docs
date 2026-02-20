@@ -5,9 +5,14 @@ description: Experience AuthRail in action with our interactive demo application
 
 The best way to understand **AuthRail** is to see it in action. We've provided a comprehensive demo application and a playground to help you explore its capabilities.
 
+<div className="flex gap-4 items-center my-6">
+  [**View Demo Repository**](https://github.com/Rahmannugar/authrail-demo)
+  [**View Core Source**](https://github.com/Rahmannugar/auth-rail)
+</div>
+
 ## Interactive Demo
 
-Our official demo showcases AuthRail integrated into a real-world React application using Vite and React Router.
+Our official demo showcases AuthRail integrated into a real-world React application using Vite and React Router. It demonstrates how to handle authentication state, multi-step policies, and real-time UI updates.
 
 ### What's Inside?
 
@@ -53,28 +58,27 @@ Visit `http://localhost:5173` to start testing.
 
 ## Testing Scenarios
 
-When running the demo, try the following scenarios to see how AuthRail handles them:
+When running the demo, try the following scenarios to see how AuthRail handle edge cases:
 
 ### 1. Unauthenticated Access
 
-Try navigating to `/dashboard` or `/admin` without logging in. AuthRail will detect the lack of authentication and redirect you to the `/login` page.
+**Action**: Log out and try to navigate directly to `/dashboard`.
+**Observation**: AuthRail's `requireAuth` middleware detects the null user and emits a `redirect` decision. The application intercepts this and sends you to `/login`.
 
 ### 2. Role-Based Access Control (RBAC)
 
-Log in with the demo credentials:
+**Action**: Log in as a standard user and try to click the "Admin Settings" link.
+**Observation**: The link might be hidden (using `RailBoundary`), but if you navigate directly to `/admin`, the `requireRole('admin')` middleware returns a `deny` decision, rendering the "Access Restricted" fallback.
 
-- **Email**: `user@demo.com`
-- **Password**: `password`
+### 3. Real-time Policy Updates
 
-Attempt to access the **Admin Portal**. You'll notice that while you can access the dashboard, the Admin area is restricted because your role is `user`, not `admin`.
-
-### 3. Dynamic Policy Toggling
-
-Use the **Policy Control Panel** in the demo to toggle "Block Dashboard" or "Grant Admin Clearance". This demonstrates how AuthRail evaluates policies dynamically based on the current context.
+**Action**: In the Policy Control Panel, toggle the "Emergency Lockdown" switch.
+**Observation**: Watch how even public routes can be instantly protected. This demonstrates how injecting global site state into the AuthAuth context allows for instant, site-wide policy changes.
 
 ### 4. Deterministic Debugging
 
-Open the browser console. AuthRail logs the evaluation process, providing transparency into which middleware allowed or denied access and why.
+**Action**: Open your browser's Developer Tools (Console tab).
+**Observation**: With `debug: true` enabled in the rail configuration, you can see every step of the evaluation. It will show exactly which check failed and what data was in the context at that moment.
 
 ---
 

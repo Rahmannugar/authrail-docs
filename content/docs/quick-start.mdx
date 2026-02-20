@@ -8,12 +8,14 @@ import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
 Follow these steps to integrate AuthRail into your application.
 
+Follow these steps to integrate AuthRail into your application in less than 5 minutes.
+
 <Steps>
 <Step>
 
 ### Install the package
 
-Install the `authrail` package using your preferred package manager.
+Install the `authrail` core package using your preferred package manager.
 
 <CodeBlock title="Terminal" className="extra-padding">
   ```bash
@@ -26,33 +28,37 @@ Install the `authrail` package using your preferred package manager.
 
 ### Define your Rail
 
-A **Rail** is a sequence of checks that a request must pass. Create a new file (e.g., `lib/auth.ts`) and define your first rail.
+A **Rail** is the blueprint for your authorization logic. It is a sequence of middleware checks that a request context must pass. Create a shared file (e.g., `lib/auth.ts`) so you can reuse these definitions across several environments.
 
 <CodeBlock title="lib/auth.ts">
 ```ts
 import { createRail, requireAuth, requireRole } from "authrail";
 
-// 1. Define the shape of your context
+// 1. Define the shape of your context for full type safety
 type AppContext = {
 user: { id: string; role: "admin" | "user" } | null;
 path: string;
 };
 
-// 2. Create the rail
+// 2. Create the rail with specific middleware
 export const adminRail = createRail<AppContext>("admin", [
-requireAuth("/login"), // Redirects to /login if user is null
-requireRole("admin"), // Denies access if role is not 'admin'
+requireAuth("/login"), // If user is null, emit a redirect to /login
+requireRole("admin"), // If role isn't 'admin', emit a 'deny' decision
 ]);
 
 ````
 </CodeBlock>
+
+> **Pro Tip**: By exporting your rails from a shared file, you ensure that you always use the same source of truth for permissions across several environments.
 
 </Step>
 <Step>
 
 ### Evaluate in your application
 
-Use the rail in your route handlers, server components, or API endpoints.
+Now, use the rail to protect a resource. This could be a Next.js Server Component, an Express route, or a React component.
+
+In this example, we'll use a **Next.js Server Component**:
 
 <CodeBlock title="app/admin/page.tsx">
 ```tsx
@@ -63,35 +69,48 @@ import { redirect } from "next/navigation";
 export default async function AdminPage() {
   const user = await getCurrentUser();
 
-  // 1. Evaluate the rail
+  // 1. Evaluate the rail with the current context
   const result = await adminRail.evaluate({
     user,
     path: "/admin"
   });
 
-  // 2. Handle the decision
+  // 2. Handle the decision based on the result type
   if (result.decision.type === "redirect") {
     redirect(result.decision.to);
   }
 
   if (result.decision.type === "deny") {
-    return <div>Access Denied</div>;
+    return (
+      <div className="p-4 border border-red-500 bg-red-50">
+        <h1>Access Denied</h1>
+        <p>You do not have permission to view this page.</p>
+      </div>
+    );
   }
 
   // 3. Render content (Access Allowed)
-  return <h1>Admin Dashboard</h1>;
+  return <h1>Welcome to the Admin Dashboard</h1>;
 }
 ````
 
 </CodeBlock>
+
+### What just happened?
+
+When `adminRail.evaluate` was called:
+
+1. It checked if `user` was present. If not, it would have returned a `redirect` decision.
+2. It checked if `user.role` was `"admin"`. If not, it would have returned a `deny` decision.
+3. Since both passed, it returned an `allow` decision, letting the component render.
 
 </Step>
 </Steps>
 
 ## Next Steps
 
-Now that you have the basics, explore more advanced concepts:
+Now that you've secured your first route, explore the full power of AuthRail:
 
-- [**<span className="text-fd-primary">Middleware</span>**](/docs/middleware) - Learn about built-in middleware.
-- [**<span className="text-fd-primary">Advanced Patterns</span>**](/docs/advanced-patterns) - Create your own custom logic.
-- [**<span className="text-fd-primary">React Integration</span>**](/docs/react-integration) - See how to use AuthRail with React and Next.js.
+- [**Middleware Deep Dive**](/docs/middleware) - Learn about `allowIf`, `blockIf`, and custom logic.
+- [**React Integration**](/docs/react-integration) - Use the `RailBoundary` and `useRail` hook.
+- [**Advanced Patterns**](/docs/advanced-patterns) - Learn how to enrich context and compose complex rules.

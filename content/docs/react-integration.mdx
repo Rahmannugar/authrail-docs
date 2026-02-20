@@ -1,123 +1,111 @@
 ---
 title: React Integration
-description: Using AuthRail in React applications.
+description: Using AuthRail utilities in React and Next.js applications.
 ---
 
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
-AuthRail provides React utilities for declarative and imperative usage.
-
-- `RailBoundary`
-- `useRail`
-- `protect`
-
-The core engine remains framework-agnostic.
-These utilities are thin wrappers around `rail.evaluate`.
+While the AuthRail core engine is framework-agnostic, we provide a set of first-class React utilities to make declarative and imperative authorization simple and performant.
 
 ---
 
-## RailBoundary
+## 1. RailBoundary
 
-`RailBoundary` evaluates a rail and renders conditionally.
+The `RailBoundary` is the most common way to protect sections of your UI. It evaluates a rail and renders its children only if authorized.
 
-<CodeBlock title="Usage">
+<CodeBlock title="Declarative Usage">
 ```tsx
 import { RailBoundary } from "authrail";
+import { adminRail } from "@/lib/auth";
 
+function AdminPortal({ user }) {
+return (
 <RailBoundary
-  rail={adminRail}
-  context={{ user }}
-  fallback={<div>Checking...</div>}
-  denied={<div>Access denied</div>}
-  onRedirect={(to) => navigate(to)}
->
-  <AdminPanel />
-</RailBoundary>;
-```
+rail={adminRail}
+context={{ user }}
+fallback={<Spinner />}
+denied={<AccessDenied />}
+onRedirect={(to) => router.push(to)} >
+<AdminSettingsForm />
+</RailBoundary>
+);
+}
+
+````
 </CodeBlock>
 
-Props:
-
-- `rail` — rail instance
-- `context` — evaluation context
-- `fallback` — rendered while evaluating
-- `denied` — rendered if decision is `deny`
-- `onRedirect` — callback if decision is `redirect`
-
-`RailBoundary` does not perform navigation.
-It emits redirect intent through `onRedirect`.
+### When to use:
+- Protecting entire page sections.
+- Showing/hiding sidebar items or complex widgets.
+- Handling automated redirects at the component level.
 
 ---
 
-## useRail
+## 2. useRail Hook
 
-For imperative evaluation inside components.
+For times when you need to make logic-based decisions within your component body, use the `useRail` hook.
 
-<CodeBlock title="Component">
+<CodeBlock title="Imperative Usage">
 ```tsx
 import { useRail } from "authrail";
 
-function DeleteButton({ user }) {
-const { decision, status } = useRail(adminRail, { user });
+function DeletePostButton({ post, user }) {
+  const { decision, status } = useRail(editRail, { user, post });
 
-if (status === "loading") return null;
-if (decision?.type !== "allow") return null;
+  if (status === "loading") return null;
 
-return <button>Delete</button>;
-}
-
-````
-</CodeBlock>
-
-Return values:
-
-<CodeBlock title="Result Type">
-```ts
-{
-  status: "idle" | "loading" | "done";
-  decision: Decision | null;
-  context: Ctx | null;
+  // Only render the button if the user is allowed to edit this post
+  return (
+    <button disabled={decision.type !== "allow"}>
+      Delete Post
+    </button>
+  );
 }
 ````
 
 </CodeBlock>
+
+### Return Object Properties:
+
+- `status`: One of `"idle"`, `"loading"`, or `"done"`.
+- `decision`: The resulting `Decision` object (`allow`, `deny`, `redirect`).
+- `context`: The final enriched context after evaluation.
 
 ---
 
-## protect
+## 3. protect (HOC)
 
-Higher-order component wrapper.
+The `protect` higher-order component is ideal for protecting page-level components or wrapping exports.
 
 <CodeBlock title="HOC Usage">
 ```tsx
 import { protect } from "authrail";
 
-const ProtectedAdmin = protect(
-adminRail,
-() => ({ user }),
-(to) => navigate(to),
+const SettingsPage = ({ user }) => {
+return <div>Sensitive Settings</div>;
+};
 
-  <div>Checking...</div>,
-  <div>Denied</div>,
-)(AdminPage);
+export default protect(
+  settingsRail,
+  (props) => ({ user: props.user }), // Get context from props
+  (to) => router.push(to),           // Handle redirects
+  <LoadingState />                   // Optional fallback
+)(SettingsPage);
 ```
 </CodeBlock>
 
-Arguments:
-
-1. `rail`
-2. `getContext` — function returning evaluation context
-3. `onRedirect`
-4. `fallback`
-5. `denied`
-
-This is useful for route-level protection.
-
 ---
 
-## Notes
+## Best Practices
 
-- Evaluation is asynchronous.
-- Context is re-evaluated when dependencies change.
-- React utilities do not modify router behavior.
-- Navigation must be handled explicitly.
+### Context Synchronization
+
+React utilities automatically re-evaluate the rail whenever the `context` object changes. Ensure your context values are stable (memoized if necessary) to prevent excessive evaluations.
+
+### Progressive Disclosure
+
+Use a mix of `RailBoundary` for large sections and `useRail` for micro-interactions (like enabling/disabling a single button). This creates a "smooth" experience where the user only sees what they are allowed to use.
+
+### Redirect Handling
+
+AuthRail emits redirect _intent_. It doesn't perform the navigation itself. Always provide an `onRedirect` callback that integrates with your specific router (Next.js, React Router, TanStack Router, etc.).

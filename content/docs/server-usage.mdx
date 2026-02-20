@@ -1,103 +1,117 @@
 ---
 title: Server Usage
-description: Using the core engine in Node.js or server environments.
+description: Using the core engine in Node.js, Express, and Serverless environments.
 ---
 
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
-The AuthRail core engine is framework-neutral.
-
-It can be used in:
-
-- Node.js APIs
-- Express middleware
-- Serverless functions
-- Edge runtimes
-- Backend services
-
-There are no React dependencies in the core evaluation logic.
+The **AuthRail** core engine is intentionally framework-neutral and has zero dependencies on React or browser APIs. This makes it a perfect fit for any server-side environment.
 
 ---
 
-## Basic Example (Node.js)
+## 1. Shared Policy Pattern
 
-<CodeBlock>
+The most effective way to use AuthRail is to define your rails in a shared path (e.g., `src/shared/policies.ts`) and import them into both your frontend and backend.
+
+<CodeBlock title="shared/policies.ts">
 ```ts
 import { createRail, requireAuth, requireRole } from "authrail";
 
-const adminRail = createRail("admin", [
-requireAuth("/login"),
-requireRole("admin"),
-]);
-
-const result = await adminRail.evaluate({
-user: req.user,
-});
-
-````
-</CodeBlock>
-
-Handle the decision:
-
-<CodeBlock>
-```ts
-if (result.decision.type !== "allow") {
-  return res.status(403).json({ error: "Forbidden" });
-}
-
-next();
-````
-
-</CodeBlock>
-
-AuthRail emits a decision.
-Your API decides how to respond.
-
----
-
-## Express Example
-
-<CodeBlock>
-```ts
-app.get("/admin", async (req, res) => {
-  const result = await adminRail.evaluate({
-    user: req.user,
-  });
-
-if (result.decision.type !== "allow") {
-return res.status(403).send("Forbidden");
-}
-
-res.send("Admin panel");
-});
-
-````
-</CodeBlock>
-
-AuthRail acts as a policy engine across every environment.
-
----
-
-## Sharing Policy Between Frontend and Backend
-
-Because the core engine is framework-independent,
-the same rail definition can be reused:
-
-- In the frontend (React)
-- In the backend (Node)
-- In server-rendered environments
-
-Example:
-
-<CodeBlock>
-```ts
-// shared/policies.ts
 export const adminRail = createRail("admin", [
   requireAuth("/login"),
   requireRole("admin"),
 ]);
+```
+</CodeBlock>
+
+---
+
+## 2. Express.js Integration
+
+You can use AuthRail inside Express middleware or directly within route handlers.
+
+<CodeBlock title="Express Middleware">
+```ts
+import { adminRail } from "./shared/policies";
+
+const protectAdmin = async (req, res, next) => {
+const result = await adminRail.evaluate({
+user: req.user,
+ip: req.ip,
+});
+
+if (result.decision.type === "redirect") {
+return res.redirect(result.decision.to);
+}
+
+if (result.decision.type === "deny") {
+return res.status(403).json({ error: "Access Denied" });
+}
+
+next();
+};
+
+app.get("/api/admin/stats", protectAdmin, (req, res) => {
+res.json({ stats: "..." });
+});
+
+````
+</CodeBlock>
+
+---
+
+## 3. Next.js Server Components & Actions
+
+AuthRail works seamlessly with Next.js Server Components. Since evaluation is asynchronous, you can simply `await` the result.
+
+<CodeBlock title="Next.js Server Action">
+```ts
+"use server";
+
+import { adminRail } from "@/lib/auth";
+import { getSession } from "@/lib/session";
+
+export async function deleteUserAction(targetUserId: string) {
+  const user = await getSession();
+
+  const result = await adminRail.evaluate({ user });
+
+  if (result.decision.type !== "allow") {
+    throw new Error("Unauthorized");
+  }
+
+  // Perform the sensitive operation
+  await db.user.delete({ where: { id: targetUserId } });
+}
 ````
 
 </CodeBlock>
 
-This allows consistent authorization logic across environments.
+---
+
+## 4. Edge Middleware (Vercel/Cloudflare)
+
+Because the core is lightweight and has no Node.js built-in dependencies, it can run at the Edge.
+
+<CodeBlock title="Edge Middleware">
+```ts
+export default async function middleware(req) {
+  const user = await verifyJwt(req.cookies.get("token"));
+  
+  const result = await adminRail.evaluate({ user });
+
+if (result.decision.type === "redirect") {
+return Response.redirect(new URL(result.decision.to, req.url));
+}
+
+return NextResponse.next();
+}
+
+```
+</CodeBlock>
+
+### Why evaluate on the server?
+- **Security**: Never rely solely on client-side authorization.
+- **Consistency**: Use the exact same Rail and Middleware that your frontend uses.
+- **Performance**: Perform complex checks close to your data source.
+```

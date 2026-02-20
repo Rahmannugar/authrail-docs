@@ -1,155 +1,139 @@
 ---
 title: Advanced Patterns
-description: Practical patterns for composing policies.
+description: Practical patterns for composing complex authorization policies.
 ---
 
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
-This section covers patterns commonly used in real applications.
+As your application grows, you'll encounter scenarios that require more than simple role checks. AuthRail's architecture is designed to handle complex, high-scale authorization patterns with ease.
 
 ---
 
-## Layered Policies
+## 1. Context Enrichment Chains
 
-You can layer middleware to separate concerns.
+One of AuthRail's most powerful features is **Context Enrichment**. Middleware can fetch data and "attach" it to the context, making it available for all subsequent middleware in the rail. This prevents "prop drilling" and redundant database calls.
 
-<CodeBlock>
+<CodeBlock title="Permissions Prefetching">
 ```ts
-createRail("admin", [
-  requireAuth("/login"),
-  requireRole("admin"),
-  allowIf((ctx) => ctx.accountVerified),
-]);
-```
-</CodeBlock>
-
-Each middleware handles one responsibility.
-
-- Authentication
-- Authorization
-- Additional constraints
-
-Execution remains strictly sequential.
-
----
-
-## Context Enrichment
-
-Middleware can enrich context before later middleware runs.
-
-<CodeBlock>
-```ts
-const attachPermissions = async (ctx) => {
+const attachUserPermissions = async (ctx) => {
   if (!ctx.user) return;
 
-const permissions = await getPermissions(ctx.user.id);
+// Fetch complex permissions from database or cache
+const perms = await db.permissions.findUnique({ where: { userId: ctx.user.id } });
 
 return {
-context: { permissions },
+context: { perms }, // This will be shallow-merged into ctx
 };
 };
+
+export const settingsRail = createRail("settings", [
+  requireAuth("/login"),
+  attachUserPermissions, // Now 'perms' is available to all checks below
+  allowIf((ctx) => ctx.perms.canEditSettings),
+  allowIf((ctx) => ctx.perms.isAccountOwner),
+]);
+```
+</CodeBlock>
+
+---
+
+## 2. Reusable Middleware Factories
+
+Don't repeat logic across different rails. Use factories to generate middleware based on parameters. This keeps your code **DRY** and maintainable.
+
+<CodeBlock title="Factory Pattern">
+```ts
+// 1. Define the factory
+const requirePermission = (permissionPath: string) => {
+  return (ctx) => {
+    const hasPerm = get(ctx.perms, permissionPath);
+    if (!hasPerm) {
+      return { decision: { type: "deny", message: `Missing: ${permissionPath}` } };
+    }
+  };
+};
+
+// 2. Use it in multiple rails
+export const productRail = createRail("products", [
+requireAuth("/login"),
+attachUserPermissions,
+requirePermission("products.view"),
+requirePermission("products.edit"),
+]);
 
 ````
 </CodeBlock>
 
-Usage:
+---
 
-<CodeBlock>
+## 3. Dynamic Policy Toggling (Feature Gating)
+
+AuthRail makes it trivial to implement global site states or feature flags into your authorization logic.
+
+<CodeBlock title="Maintenance Mode Pattern">
 ```ts
-createRail("billing", [
+const blockInMaintenance = (ctx) => {
+  if (ctx.systemState.isMaintenanceMode && ctx.user.role !== "admin") {
+    return {
+      decision: { type: "redirect", to: "/maintenance" }
+    };
+  }
+};
+
+export const appRail = createRail("main", [
+  blockInMaintenance,
   requireAuth("/login"),
-  attachPermissions,
-  allowIf((ctx) => ctx.permissions?.canAccessBilling),
+  // ... rest of the rail
 ]);
 ````
 
 </CodeBlock>
 
-Returned `context` values are shallow-merged before the next middleware executes.
-
 ---
 
-## Conditional Redirect Chains
+## 4. Layered Decisions (RBAC + ABAC)
 
-Middleware can perform structured redirect flows.
+You can combine Role-Based Access Control (RBAC) with Attribute-Based Access Control (ABAC) in a single rail.
 
-<CodeBlock>
+<CodeBlock title="Hybrid Pattern">
 ```ts
-const onboardingRail = createRail("onboarding", [
-  (ctx) => {
-    if (!ctx.profile.completedProfile) {
-      return {
-        decision: { type: "redirect", to: "/onboarding/profile" },
-      };
-    }
-  },
-  (ctx) => {
-    if (!ctx.profile.selectedPlan) {
-      return {
-        decision: { type: "redirect", to: "/pricing" },
-      };
-    }
-  },
-]);
-```
-</CodeBlock>
-
-Only the first matching redirect executes.
-
----
-
-## Feature Flags
-
-Feature gating is straightforward.
-
-<CodeBlock>
-```ts
-const featureRail = createRail("feature", [
+export const documentRail = createRail("docs", [
   requireAuth("/login"),
-  allowIf((ctx) => ctx.featureFlags?.newDashboard === true),
+  
+  // RBAC: Admins always get in
+  (ctx) => {
+    if (ctx.user.role === "admin") return { decision: { type: "allow" } };
+  },
+
+// ABAC: Owners can access their own documents
+allowIf((ctx) => ctx.user.id === ctx.document.ownerId),
+
+// ABAC: Collaborators can access if document is public
+allowIf((ctx) => ctx.document.isPublic),
 ]);
-```
-</CodeBlock>
 
-Feature flags remain external.
-AuthRail evaluates them.
-
----
-
-## Reusable Middleware Factories
-
-Middleware can be parameterized.
-
-<CodeBlock>
-```ts
-const requireFeature = (featureName: string) =>
-  allowIf((ctx) => ctx.features?.[featureName] === true);
-```
-</CodeBlock>
-
-Usage:
-
-<CodeBlock>
-  ```ts createRail("beta", [ requireAuth("/login"),
-  requireFeature("betaAccess"), ]); ```
+````
 </CodeBlock>
 
 ---
 
-## Composing Rails
+## 5. Parameterized Rails
 
-You can evaluate one rail inside another if needed.
+If you need to evaluate a rail based on dynamic parameters (like a specific resource ID), pass them in as part of the context during evaluation.
 
-<CodeBlock>
+<CodeBlock title="Evaluation with Param">
 ```ts
-const result = await adminRail.evaluate(ctx);
+const result = await documentRail.evaluate({
+  user,
+  documentId: params.id, // Parameterized context
+  systemState: getGlobalState(),
+});
+````
 
-if (result.decision.type !== "allow") {
-return result;
-}
-
-```
 </CodeBlock>
 
-Rails are plain objects in AuthRail, leaving composition to be explicit.
+By mastering these patterns, you can build authorization systems that are not only secure but also highly performant and easy to reason about.
+
+```
+
 ```

@@ -5,144 +5,133 @@ description: Built-in and custom middleware.
 
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
-Middleware defines how a rail evaluates context.
+Middleware functions are the building blocks of a Rail. They inspect the current context and determine if the evaluation should continue, block, or redirect.
 
-AuthRail provides several built-in middleware utilities.
+AuthRail provides several highly-optimized built-in middleware utilities to cover common authorization patterns.
 
 ---
 
-## requireAuth
+## 1. requireAuth
 
-Ensures a user exists in context.
+Ensures that a user object exists within the context. This is typically the first middleware in any protective rail.
 
-```ts
-requireAuth(redirectTo: string)
-```
-
-Example:
-
-<CodeBlock>
+<CodeBlock title="Usage">
 ```ts
 import { requireAuth } from "authrail";
 
-requireAuth("/login");
+requireAuth("/login"); // Redirect destination if user is missing
 
 ````
 </CodeBlock>
 
-Behavior:
-
-- If `ctx.user` is falsy → returns `{ type: "redirect" }`
-- Otherwise → continues execution
+### Technical Behavior:
+- **Check**: Evaluates if `ctx.user` is truthy.
+- **On Failure**: Returns `{ type: "redirect", to: "/login" }`.
+- **On Success**: Continues to the next middleware.
 
 ---
 
-## requireRole
+## 2. requireRole
 
-Ensures the user has a specific role.
+Ensures that the authenticated user possesses a specific role string.
 
-```ts
-requireRole(role: string)
-````
-
-Example:
-
-<CodeBlock>
+<CodeBlock title="Usage">
 ```ts
 import { requireRole } from "authrail";
 
-requireRole("admin");
+requireRole("admin"); // Explicit role required
+````
+
+</CodeBlock>
+
+### Technical Behavior:
+
+- **Check**: Compares `ctx.user.role === role`.
+- **On Failure**: Returns `{ type: "deny" }`.
+- **Note**: This middleware assumes `requireAuth` has already run, ensuring `ctx.user` is defined.
+
+---
+
+## 3. allowIf
+
+A flexible predicate-based check. If the predicate returns `true`, context passes through.
+
+<CodeBlock title="Usage">
+```ts
+import { allowIf } from "authrail";
+
+// Only allow if the account is not suspended
+allowIf((ctx) => ctx.user.status === "active");
 
 ````
 </CodeBlock>
 
-Behavior:
-
-- If `ctx.user.role` does not match → returns `{ type: "deny" }`
-- Otherwise → continues execution
-
 ---
 
-## allowIf
+## 4. blockIf
 
-Allows execution only if a predicate returns `true`.
+The inverse of `allowIf`. If the predicate returns `true`, execution is immediately blocked.
 
+<CodeBlock title="Usage">
 ```ts
-allowIf(predicate: (ctx) => boolean)
+import { blockIf } from "authrail";
+
+// Block if the user is currently on a "Free" plan trying to access "Pro" features
+blockIf((ctx) => ctx.user.plan === "free" && ctx.feature.isPremium);
 ````
 
-Example:
-
-```ts
-allowIf((ctx) => ctx.featureFlags?.billing === true);
-```
-
-Behavior:
-
-- If predicate returns `false` → returns `{ type: "deny" }`
-- If predicate returns `true` → continues execution
-
----
-
-## blockIf
-
-Blocks execution if a predicate returns `true`.
-
-```ts
-blockIf(predicate: (ctx) => boolean)
-```
-
-Example:
-
-```ts
-blockIf((ctx) => ctx.user?.suspended === true);
-```
-
-Behavior:
-
-- If predicate returns `true` → returns `{ type: "deny" }`
-- Otherwise → continues execution
+</CodeBlock>
 
 ---
 
 ## Writing Custom Middleware
 
-You can define middleware directly.
+While built-ins cover many cases, AuthRail's true power lies in custom middleware. A middleware is a function that receives the current (potentially enriched) context and optionally returns a result.
 
-Example:
-
-<CodeBlock>
+<CodeBlock title="Custom Middleware Example">
 ```ts
 const requireSubscription = async (ctx) => {
-  if (!ctx.subscriptionActive) {
-    return {
-      decision: { type: "redirect", to: "/billing" }
-    };
-  }
+  // 1. Perform your check (can be async)
+  const isSubscribed = await checkBillingStatus(ctx.user.id);
+
+// 2. Return a decision if check fails
+if (!isSubscribed) {
+return {
+decision: { type: "redirect", to: "/billing/upgrade" }
 };
-```
+}
+
+// 3. (Optional) Enrich context for later middleware
+return {
+context: { isSubscribed }
+};
+};
+
+````
 </CodeBlock>
 
-Middleware must:
-
-- Accept a context object
-- Return either `void` or a `MiddlewareResult`
-- Remain deterministic
+### Rules for Custom Middleware:
+1.  **Deterministic**: Avoid using global state. Only use the data provided in the `ctx`.
+2.  **Short-circuiting**: To stop the rail, return a `decision`.
+3.  **Enrichment**: To add data for later checks, return a `context` object.
+4.  **Implicit Allow**: If you return `void` (or nothing), the rail considers the check "passed" and moves to the next step.
 
 ---
 
 ## Middleware Composition
 
-Middleware is composed simply by array order:
+Middleware is composed by the order of the array passed to `createRail`. Evaluation proceeds strictly from index `0` to `N`.
 
-<CodeBlock>
+<CodeBlock title="Composed Rail">
 ```ts
-createRail("admin", [
-  requireAuth("/login"),
-  requireRole("admin"),
-  allowIf((ctx) => ctx.accountVerified),
+createRail("admin-dashboard", [
+  requireAuth("/login"),            // Gate 1: Authentication
+  requireRole("admin"),             // Gate 2: Authorization
+  requireFeature("new-dash"),       // Gate 3: Custom Check
+  allowIf((ctx) => !ctx.isLocked),  // Gate 4: Dynamic State
 ]);
-```
+````
+
 </CodeBlock>
 
-Evaluation proceeds strictly from top to bottom.
+By splitting complex logic into atomic middleware functions, you create a system that is easy to read, test, and debug.

@@ -5,154 +5,114 @@ description: How AuthRail evaluates middleware.
 
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
-AuthRail is built around three primitives:
+---
 
-- Rail
-- Middleware
-- Decision
-
-Understanding these explains the entire system.
+AuthRail is built on three pillars: **Rails**, **Context**, and **Decisions**. Understanding these is key to mastering the system.
 
 ---
 
-## Rail
+## 1. The Rail
 
-A rail is a named collection of ordered middleware.
+A **Rail** is an immutable pipeline of authorization checks. It represents a single specific "path" of permission logic (e.g., "Admin Rail", "Billing Rail", "Public API Rail").
 
-<CodeBlock>
+Think of it like a **security checkpoint** at an airport: Each person (context) must pass through a sequence of scanners (middleware). If any scanner detects an issue, the person is either turned away or redirected to a secondary check.
+
+<CodeBlock title="Creating a Rail">
 ```ts
-createRail<Ctx>(name: string, middleware: Middleware<Ctx>[])
+import { createRail } from "authrail";
+
+export const billingRail = createRail("billing", [
+  requireAuth("/login"),
+  requireSubscription(),
+  allowIf((ctx) => ctx.user.canManageBilling),
+]);
 ```
 </CodeBlock>
 
-A rail does not execute automatically.
-It must be evaluated explicitly:
+### Key Characteristics:
 
-<CodeBlock className="extra-padding">
-```bash
-await rail.evaluate(context);
-```
-</CodeBlock>
-
-Each evaluation is independent.
+- **Sequential**: Middleware is executed strictly in the order provided in the array.
+- **Micro-evaluation**: Execution stops the moment a `deny` or `redirect` is encountered.
+- **Traceable**: With `debug: true`, you can observe exactly where a context was halted.
 
 ---
 
-## Middleware
+## 2. The Context
 
-Middleware is a function that receives context and may return:
+The **Context** is the "data envelope" that carries all the information needed to make a decision. AuthRail is unique because it doesn't force a specific context structure—you define it.
 
-<CodeBlock>
+<CodeBlock title="Defining Context">
 ```ts
-type MiddlewareResult<Ctx> = {
-  decision?: {
-    type: "allow" | "deny" | "redirect";
-    to?: string;
-  };
-  context?: Partial<Ctx>;
+type AppContext = {
+  user: User | null;         // Authentication state
+  resource?: Document;       // The thing being accessed
+  environment: "dev" | "prod"; // System state
+  ipAddress: string;         // Request metadata
 };
 ```
 </CodeBlock>
 
-Signature:
+### Immutability & Enrichment
 
-<CodeBlock>
+While the initial context you provide is treated as read-only by most middleware, AuthRail supports **context enrichment**. A middleware can return a `context` object which will be shallow-merged with the original context for all _subsequent_ middleware in the rail.
+
+This is powerful for patterns like:
+
+- Fetching user permissions once and attaching them to the context.
+- Resolving a resource ID into a full object for later checks.
+
+---
+
+## 3. The Decision
+
+The **Decision** is the final verdict of a rail evaluation. Unlike boolean-based systems, AuthRail provides structured intent.
+
+<CodeBlock title="Decision Types">
 ```ts
-type Middleware<Ctx> = (
-  ctx: Readonly<Ctx>
-) => Promise<MiddlewareResult<Ctx> | void> | MiddlewareResult<Ctx> | void;
+type Decision = 
+  | { type: "allow" }                     // Everything passed
+  | { type: "deny", message?: string }     // Blocked locally
+  | { type: "redirect", to: string };      // Instruction to move elsewhere
 ```
 </CodeBlock>
 
-Middleware can:
+### Result Object
 
-- return nothing → continue
-- return `decision` → short-circuit
-- return `context` → enrich context
+When you call `rail.evaluate(context)`, you receive a `Result` object:
 
----
-
-## Execution Order
-
-Middleware runs strictly in array order.
-
-Given:
-
-<CodeBlock>
-  ```ts createRail("example", [ middlewareA, middlewareB, middlewareC, ]); ```
-</CodeBlock>
-
-Execution flow:
-
-1. `middlewareA`
-2. `middlewareB`
-3. `middlewareC`
-
-If `middlewareA` returns `deny`,  
-`middlewareB` and `middlewareC` will not execute.
-
-There is no parallelism.
-There is no reordering.
-
----
-
-## Context Enrichment
-
-Middleware may return additional context:
-
-<CodeBlock>
+<CodeBlock title="Evaluation Result">
 ```ts
-return {
-  context: { permissions }
-};
+const { decision, context, name } = await adminRail.evaluate(ctx);
 ```
 </CodeBlock>
 
-Returned context is shallow-merged into the working context before the next middleware runs.
-
-Example:
-
-<CodeBlock>
-```ts
-initialContext = { user }
-middleware1 returns { context: { permissions } }
-
-next middleware receives:
-{ user, permissions }
-
-````
-</CodeBlock>
+- `decision`: The final result (`allow`, `deny`, or `redirect`).
+- `context`: The final enriched context (including any data added by middleware).
+- `name`: The name of the rail (useful for logging and telemetry).
 
 ---
 
-## Default Behavior
+## Execution Dynamics
 
-If no middleware returns a blocking decision,
-the final decision is:
+### 1. Strict Sequential Order
 
-<CodeBlock>
-```ts
-{ type: "allow" }
-````
+Middleware runs strictly in the order you define. There is no parallel execution, and there are no reorderings. This ensures that a `requireAuth` check _always_ runs before a `requireRole` check, preventing "undefined" errors when accessing `ctx.user.role`.
 
-</CodeBlock>
+### 2. Micro-Evaluation (Fast-Fail)
+
+The moment a middleware returns a `deny` or `redirect`, the rail stops. No further middleware functions are called. This saves resources and ensures that potentially expensive permission checks aren't performed if the user is already blocked.
+
+### 3. Default Allow
+
+If the context makes it to the end of the rail without any middleware returning a blocking decision, the rail returns `allow`. This follows the principle of "composition of constraints"—you list what checks must pass, and if they all do, access is granted.
 
 ---
 
-## Evaluation Output
+## The Big Picture: How they interact
 
-Every evaluation returns:
+1.  **Define** a Rail with a set of Middleware.
+2.  **Assemble** a Context based on the current request or user session.
+3.  **Evaluate** the Rail with that Context.
+4.  **Execute** your application logic based on the resulting Decision.
 
-<CodeBlock>
-```ts
-{
-  decision: {
-    type: "allow" | "deny" | "redirect",
-    to?: string
-  },
-  context: Ctx
-}
-```
-</CodeBlock>
-
-`context` reflects any enrichment performed during execution.
+By keeping these concerns separate, AuthRail ensures that your authorization logic remains testable, reusable, and perfectly predictable.

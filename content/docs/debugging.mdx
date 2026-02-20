@@ -1,44 +1,77 @@
 ---
 title: Debugging
-description: Inspecting rail evaluation.
+description: Inspecting rail evaluation and troubleshooting common issues.
 ---
 
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 
-AuthRail can emit evaluation logs when debug mode is enabled.
+Authorization logic can become complex. AuthRail provides built-in tools to help you visualize and debug the evaluation process in real-time.
 
 ---
 
-## Enabling Debug Mode
+## 1. Enabling Debug Mode
 
-<CodeBlock>
+To enable detailed logging for a specific rail, pass the `debug: true` flag in the third argument of `createRail`.
+
+<CodeBlock title="Debug Configuration">
 ```ts
-createRail("admin", middleware, { debug: true });
+export const adminRail = createRail("admin", middleware, { 
+  debug: true 
+});
 ```
 </CodeBlock>
 
-When enabled, each middleware execution is logged.
-
-Example output:
-
-<CodeBlock>
-```text
-[AuthRail:admin] → requireAuthMiddleware
-[AuthRail:admin] → requireRoleMiddleware
-[AuthRail:admin] decision → allow
-```
-</CodeBlock>
+Once enabled, every `evaluate()` call for this rail will output its step-by-step progress to the console.
 
 ---
 
-## What Gets Logged
+## 2. Interpreting the Logs
 
-When `debug` is enabled:
+When `debug` is active, you will see structured output in your development console.
 
-- Each middleware invocation
-- Context enrichment events
-- Final decision
+<CodeBlock title="Console Output">
+```text
+[AuthRail:admin] → Starting evaluation
+[AuthRail:admin] → Running [requireAuth]...
+[AuthRail:admin] ✓ [requireAuth] passed.
+[AuthRail:admin] → Running [attachPermissions]...
+[AuthRail:admin] + Context enriched: { perms: [...] }
+[AuthRail:admin] → Running [requireRole]...
+[AuthRail:admin] ✖ [requireRole] failed. Decision: deny
+[AuthRail:admin] Decision: deny
+```
+</CodeBlock>
 
-Logging is performed using `console.log`.
+### What the symbols mean:
 
-AuthRail does not bundle a logging library.
+- **`→`**: Evaluation started or a middleware is beginning execution.
+- **`✓`**: Middleware completed without returning a blocking decision.
+- **`+`**: Middleware returned a `context` object (Context Enrichment).
+- **`✖`**: Middleware returned a `deny` or `redirect` decision (Short-circuit).
+
+---
+
+## 3. Common Troubleshooting
+
+### "Context property is undefined"
+
+**Issue**: A middleware is trying to access `ctx.user.role`, but `ctx.user` is undefined.
+**Fix**: Ensure `requireAuth()` is the very first middleware in your rail. Order matters—middleware only sees what has been verified by the steps before it.
+
+### "Redirect is not happening"
+
+**Issue**: The rail returns `{ type: "redirect" }`, but the page doesn't move.
+**Fix**: Remember that AuthRail _emits_ a decision, it doesn't _execute_ navigation. Ensure you are using the `onRedirect` prop in `RailBoundary` or handling the result manually in your route handlers.
+
+### "Infinite loop in React"
+
+**Issue**: The component keeps re-rendering and re-evaluating the rail.
+**Fix**: AuthRail evaluates whenever the `context` object changes. If you are passing an object literal `context={{ user }}` where `user` is recreated on every render, it will trigger a restart. Use `useMemo` for your context object if it's not stable.
+
+---
+
+## 4. Best Practices for Debugging
+
+- **Name your Middleware**: When writing custom functions, give them names. Anonymous functions show up as `anonymous` in the debug logs, making them harder to track.
+- **Disable in Production**: Ensure you use a conditional flag so debug logs don't clutter your production users' consoles: `{ debug: process.env.NODE_ENV !== 'production' }`.
+- **Use enriched context**: Check the `context` property in the result object returned by `evaluate()`. It contains the state of the context at the end of the evaluation.
