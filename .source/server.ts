@@ -1,9 +1,10 @@
 // @ts-nocheck
-import * as __fd_glob_10 from "../content/docs/server-usage.mdx?collection=docs"
-import * as __fd_glob_9 from "../content/docs/react-integration.mdx?collection=docs"
-import * as __fd_glob_8 from "../content/docs/quick-start.mdx?collection=docs"
-import * as __fd_glob_7 from "../content/docs/middleware.mdx?collection=docs"
-import * as __fd_glob_6 from "../content/docs/introduction.mdx?collection=docs"
+import * as __fd_glob_11 from "../content/docs/server-usage.mdx?collection=docs"
+import * as __fd_glob_10 from "../content/docs/react-integration.mdx?collection=docs"
+import * as __fd_glob_9 from "../content/docs/quick-start.mdx?collection=docs"
+import * as __fd_glob_8 from "../content/docs/middleware.mdx?collection=docs"
+import * as __fd_glob_7 from "../content/docs/introduction.mdx?collection=docs"
+import * as __fd_glob_6 from "../content/docs/demo.mdx?collection=docs"
 import * as __fd_glob_5 from "../content/docs/debugging.mdx?collection=docs"
 import * as __fd_glob_4 from "../content/docs/core-concepts.mdx?collection=docs"
 import * as __fd_glob_3 from "../content/docs/clarifications.mdx?collection=docs"
@@ -18,4 +19,4 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
   }
 }>({"doc":{"passthroughs":["extractedReferences"]}});
 
-export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, }, {"advanced-patterns.mdx": __fd_glob_1, "api-reference.mdx": __fd_glob_2, "clarifications.mdx": __fd_glob_3, "core-concepts.mdx": __fd_glob_4, "debugging.mdx": __fd_glob_5, "introduction.mdx": __fd_glob_6, "middleware.mdx": __fd_glob_7, "quick-start.mdx": __fd_glob_8, "react-integration.mdx": __fd_glob_9, "server-usage.mdx": __fd_glob_10, });
+export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, }, {"advanced-patterns.mdx": __fd_glob_1, "api-reference.mdx": __fd_glob_2, "clarifications.mdx": __fd_glob_3, "core-concepts.mdx": __fd_glob_4, "debugging.mdx": __fd_glob_5, "demo.mdx": __fd_glob_6, "introduction.mdx": __fd_glob_7, "middleware.mdx": __fd_glob_8, "quick-start.mdx": __fd_glob_9, "react-integration.mdx": __fd_glob_10, "server-usage.mdx": __fd_glob_11, });

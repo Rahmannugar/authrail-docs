@@ -12,6 +12,7 @@ import {
   Server,
   Cpu,
   Atom,
+  Play,
   type LucideIcon,
 } from "lucide-react";
 type PageTreeRoot = typeof source.pageTree;
@@ -33,6 +34,8 @@ const icons: Record<string, LucideIcon> = {
   "api-reference": Library,
   "react-integration": Atom,
   react: Atom,
+  demo: Play,
+  "demo-&-live-testing": Play,
 };
 
 function enhanceTree(tree: PageTreeRoot): PageTreeRoot {

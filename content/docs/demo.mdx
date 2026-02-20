@@ -1,0 +1,88 @@
+---
+title: Demo & Live Testing
+description: Experience AuthRail in action with our interactive demo applications.
+---
+
+The best way to understand **AuthRail** is to see it in action. We've provided a comprehensive demo application and a playground to help you explore its capabilities.
+
+## Interactive Demo
+
+Our official demo showcases AuthRail integrated into a real-world React application using Vite and React Router.
+
+### What's Inside?
+
+- **Route Protection**: Automated redirects for unauthorized users. Experience how AuthRail intercepts unauthorized navigation attempts before they reach your components, ensuring a secure and seamless flow.
+- **Granular Permissions**: UI elements that appear or disappear based on user roles. See how easy it is to conditionally render components or disable actions using the `protect()` HOC or `RailBoundary`.
+- **Dynamic Policy Toggling**: A control panel to modify permissions in real-time. This highlights AuthRail's reactivity—watch the UI instantly adapt as you toggle policies without a page reload.
+- **Detailed Debugging**: Real-time logs showing why a policy was allowed or denied. AuthRail provides a transparent look into the decision-making process, making it incredibly easy to debug complex permission logic.
+
+### Why use the demo?
+
+The demo serves as a living blueprint. Instead of just reading about middleware and rails, you can interact with them. It demonstrates best practices for:
+
+- Managing authentication state in a React app.
+- Structuring complex permission rules into maintainable rails.
+- Handling redirects and "Access Denied" states gracefully.
+- Integrating AuthRail with popular routing libraries like React Router.
+
+### Try it Locally
+
+You can run the demo on your own machine to experiment with the code:
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/Rahmannugar/authrail-demo
+   cd authrail-demo
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+Visit `http://localhost:5173` to start testing.
+
+---
+
+## Testing Scenarios
+
+When running the demo, try the following scenarios to see how AuthRail handles them:
+
+### 1. Unauthenticated Access
+
+Try navigating to `/dashboard` or `/admin` without logging in. AuthRail will detect the lack of authentication and redirect you to the `/login` page.
+
+### 2. Role-Based Access Control (RBAC)
+
+Log in with the demo credentials:
+
+- **Email**: `user@demo.com`
+- **Password**: `password`
+
+Attempt to access the **Admin Portal**. You'll notice that while you can access the dashboard, the Admin area is restricted because your role is `user`, not `admin`.
+
+### 3. Dynamic Policy Toggling
+
+Use the **Policy Control Panel** in the demo to toggle "Block Dashboard" or "Grant Admin Clearance". This demonstrates how AuthRail evaluates policies dynamically based on the current context.
+
+### 4. Deterministic Debugging
+
+Open the browser console. AuthRail logs the evaluation process, providing transparency into which middleware allowed or denied access and why.
+
+---
+
+## Explore the Source
+
+The demo is built using the core **AuthRail** library. You can find the source code for both below:
+
+- [**AuthRail Core**](https://github.com/Rahmannugar/auth-rail): The framework-agnostic engine.
+- [**AuthRail Demo**](https://github.com/Rahmannugar/authrail-demo): The React/Vite implementation.
+
+Ready to integrate it into your own project? Head over to the [**Quick Start**](/docs/quick-start) guide.
